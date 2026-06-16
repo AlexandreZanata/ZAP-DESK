@@ -1,0 +1,35 @@
+build/
+cmake-build-*/
+*.user
+*.autosave
+.idea/
+.vscode/
+
+# Binários
+zap-desk
+*.o
+*.a
+
+# ZAP-DESK runtime
+.zap-desk.pid
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg
+
+# Reconner results
+results/
+reconner/test-results/
+
+# Env
+.env
+.env.*
+
+# OS
+.DS_Store
+*~

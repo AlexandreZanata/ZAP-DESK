@@ -1,0 +1,35 @@
+---
+description: Arquitetura e padrões core do ZAP-DESK (C++/Qt/Linux)
+alwaysApply: true
+---
+
+# ZAP-DESK — Regras do Projeto
+
+Monorepo: **ZAP-DESK** (Qt6/C++20) + **Reconner** (Python em `reconner/`).
+
+## Princípios
+
+- UI em `src/ui/` — apenas orquestração, sem lógica de domínio
+- ZAP REST API somente via `ZapClient`
+- Recon somente via `ReconRunner` → `python3 -m reconner`
+- Paths via `AppConfig` — nunca hardcode `/data/dev/...`
+- Recon exige autorização confirmada na UI antes de executar
+
+## Estrutura
+
+```
+src/config/     → AppConfig (env, XDG paths)
+src/core/       → ZapClient, ZapDaemon
+src/services/   → ReconRunner, ReconBridge, ZapUpdater
+src/ui/         → MainWindow (tema hacker 90s)
+reconner/       → engine Python vendored
+docs/           → ARCHITECTURE.md, STACK.md, INTEGRATION.md
+```
+
+## Fluxo principal
+
+BOOT ZAP → RUN RECON (--proxy) → FEED ZAP (summary.json) → ACTIVE SCAN
+
+## Docs completos
+
+Consulte `docs/ARCHITECTURE.md` antes de mudanças estruturais.

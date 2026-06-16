@@ -1,0 +1,357 @@
+# 🔍 Reconnaissance Report — {{ target_domain }}
+
+**Scan Date:** {{ scan_date }}
+
+---
+
+## 📊 Executive Summary
+
+This report contains the results of an automated security reconnaissance scan
+performed by [Reconner](https://github.com/yourusername/reconner).
+
+### Key Statistics
+
+| Metric | Count |
+|--------|-------|
+| **Subdomains Discovered** | {{ statistics.subdomains }} |
+| **Live Hosts** | {{ statistics.live_hosts }} |
+| **Technologies Detected** | {{ statistics.technologies }} |
+| **Paths Discovered** | {{ statistics.paths }} |
+| **Open Ports (nmap)** | {{ statistics.open_ports }} |
+| **Total Vulnerabilities** | {{ statistics.vulnerabilities }} |
+| **Critical Findings** | {{ statistics.critical }} |
+| **High Severity Findings** | {{ statistics.high }} |
+| **Medium Severity Findings** | {{ statistics.medium }} |
+
+---
+
+## 🛠️ Tool Versions
+
+The following tools were used in this scan:
+
+{% for tool, info in tool_versions.items() %}
+- **{{ tool }}:** {{ info.version or 'Unknown' }} (`{{ info.path }}`)
+{% endfor %}
+
+---
+
+## 🌐 Discovered Subdomains
+
+{% if subdomains %}
+Total: **{{ subdomains | length }}** subdomains discovered.
+
+{% for subdomain in subdomains %}
+- `{{ subdomain }}`
+{% endfor %}
+{% else %}
+No subdomains discovered.
+{% endif %}
+
+---
+
+## ✅ Live Hosts
+
+{% if live_hosts %}
+Total: **{{ live_hosts | length }}** live hosts identified.
+
+{% for host in live_hosts %}
+- {{ host }}
+{% endfor %}
+{% else %}
+No live hosts found.
+{% endif %}
+
+---
+
+## 🗺️ Port scan (nmap)
+
+Default profile: **-Pn -sV** on **top TCP ports** (1000 in full mode, 100 in `--fast`), timing **T4** (or **T2** in `--stealth`).
+
+{% if nmap_results %}
+**Open ports (sample, up to 200 rows):** {{ nmap_results | length }}
+
+| Host | Port | Protocol | Service | Product | Version |
+|------|------|----------|---------|---------|---------|
+{% for row in nmap_results[:80] %}
+| `{{ row.host or row.scanned_target or '—' }}` | {{ row.port }} | {{ row.protocol }} | {{ row.service or '—' }} | {{ row.product or '—' }} | {{ row.version or '—' }} |
+{% endfor %}
+{% if nmap_results | length > 80 %}
+*…truncated; see `summary.json` field `nmap_results` for the full list.*
+{% endif %}
+{% else %}
+No nmap rows recorded (tool missing, no live hosts, or no open ports in parsed output).
+{% endif %}
+
+---
+
+## 🔴 Critical Findings
+
+{% set critical_findings = [] %}
+{% for finding in nuclei_results %}
+  {% if finding.severity == 'critical' %}
+    {% set _ = critical_findings.append(finding) %}
+  {% endif %}
+{% endfor %}
+
+{% if critical_findings %}
+**Total Critical Findings:** {{ critical_findings | length }}
+
+{% for finding in critical_findings %}
+### {{ finding.name or 'Unknown Vulnerability' }}
+
+| Field | Value |
+|-------|-------|
+| **URL** | `{{ finding.url }}` |
+| **Template ID** | `{{ finding.template_id }}` |
+| **Severity** | 🔴 CRITICAL |
+| **Matched At** | `{{ finding.matched_at }}` |
+| **Host** | `{{ finding.host }}` |
+
+{% if finding.info %}
+**Details:**
+{% for key, value in finding.info.items() %}
+- **{{ key }}:** {{ value }}
+{% endfor %}
+{% endif %}
+
+**Verification:**
+```bash
+curl -v "{{ finding.url }}"
+```
+
+---
+{% endfor %}
+{% else %}
+✅ No critical findings detected.
+{% endif %}
+
+---
+
+## 🟠 High Severity Findings
+
+{% set high_findings = [] %}
+{% for finding in nuclei_results %}
+  {% if finding.severity == 'high' %}
+    {% set _ = high_findings.append(finding) %}
+  {% endif %}
+{% endfor %}
+
+{% if high_findings %}
+**Total High Severity Findings:** {{ high_findings | length }}
+
+{% for finding in high_findings[:20] %}
+### {{ finding.name or 'Unknown Vulnerability' }}
+
+- **URL:** `{{ finding.url }}`
+- **Template ID:** `{{ finding.template_id }}`
+- **Severity:** 🟠 HIGH
+- **Matched At:** `{{ finding.matched_at }}`
+
+---
+{% endfor %}
+{% if high_findings | length > 20 %}
+*... and {{ high_findings | length - 20 }} more high severity findings. See `summary.json` for the complete list.*
+{% endif %}
+{% else %}
+✅ No high severity findings detected.
+{% endif %}
+
+---
+
+## 🟡 Medium Severity Findings
+
+{% set medium_findings = [] %}
+{% for finding in nuclei_results %}
+  {% if finding.severity == 'medium' %}
+    {% set _ = medium_findings.append(finding) %}
+  {% endif %}
+{% endfor %}
+
+{% if medium_findings %}
+**Total Medium Severity Findings:** {{ medium_findings | length }}
+
+{% for finding in medium_findings[:10] %}
+- **{{ finding.name }}** at `{{ finding.url }}` — Template: `{{ finding.template_id }}`
+{% endfor %}
+{% if medium_findings | length > 10 %}
+*... and {{ medium_findings | length - 10 }} more. See `summary.json`.*
+{% endif %}
+{% else %}
+✅ No medium severity findings detected.
+{% endif %}
+
+---
+
+## 📁 Interesting Paths Discovered
+
+{% if gobuster_results %}
+**Total Paths Found:** {{ gobuster_results | length }}
+
+| Path | Status | Size | Target URL |
+|------|--------|------|------------|
+{% for path in gobuster_results[:50] %}
+| `{{ path.path }}` | {{ path.status }} | {{ path.size }} | {{ path.get('target_url', 'N/A') }} |
+{% endfor %}
+
+{% if gobuster_results | length > 50 %}
+*... and {{ gobuster_results | length - 50 }} more paths. See `summary.json`.*
+{% endif %}
+
+### Sensitive Paths
+
+{% set sensitive_keywords = ['admin', 'api', 'backup', 'config', 'test', 'dev', 'secret', 'private', 'internal'] %}
+{% set sensitive_paths = [] %}
+{% for path in gobuster_results %}
+  {% set path_lower = path.path | lower %}
+  {% for keyword in sensitive_keywords %}
+    {% if keyword in path_lower and path not in sensitive_paths %}
+      {% set _ = sensitive_paths.append(path) %}
+    {% endif %}
+  {% endfor %}
+{% endfor %}
+
+{% if sensitive_paths %}
+⚠️ The following paths may expose sensitive information:
+
+{% for path in sensitive_paths[:20] %}
+- `{{ path.path }}` (Status: {{ path.status }}) — {{ path.get('target_url', 'N/A') }}
+{% endfor %}
+{% else %}
+No obviously sensitive paths identified.
+{% endif %}
+
+{% else %}
+No paths discovered during directory enumeration.
+{% endif %}
+
+---
+
+## 🔧 Technologies Detected
+
+{% if technologies %}
+{% for tech in technologies %}
+- **{{ tech }}**
+{% endfor %}
+
+### Technology Details (per host)
+
+{% for result in whatweb_results[:20] %}
+#### {{ result.url }}
+
+{% if result.plugins %}
+{% for plugin, data in result.plugins.items() %}
+- **{{ plugin }}:** {{ data }}
+{% endfor %}
+{% endif %}
+
+{% endfor %}
+{% else %}
+No specific technologies detected.
+{% endif %}
+
+---
+
+## 📋 HTTP Response Details
+
+{% if httpx_results %}
+{% for result in httpx_results[:30] %}
+#### {{ result.url }}
+
+- **Status Code:** {{ result.status_code }}
+- **Title:** {{ result.title }}
+- **Content Length:** {{ result.content_length }}
+- **Server:** {{ result.server }}
+{% if result.tech %}
+- **Technologies:** {{ result.tech | join(', ') }}
+{% endif %}
+
+{% endfor %}
+{% if httpx_results | length > 30 %}
+*... and {{ httpx_results | length - 30 }} more hosts. See `summary.json`.*
+{% endif %}
+{% endif %}
+
+---
+
+## ⚠️ Errors and Warnings
+
+{% if errors %}
+The following errors occurred during the scan:
+
+{% for error in errors %}
+- **{{ error.tool }}:** {{ error.error }} *({{ error.timestamp }})*
+{% endfor %}
+{% else %}
+✅ No errors occurred during the scan.
+{% endif %}
+
+---
+
+## 💡 Recommendations
+
+Based on the findings of this scan:
+
+1. **Immediate Action Required:**
+{% if statistics.critical > 0 %}
+   - Remediate all **{{ statistics.critical }} critical findings** immediately.
+{% endif %}
+{% if statistics.high > 0 %}
+   - Address all **{{ statistics.high }} high severity findings** as soon as possible.
+{% endif %}
+{% if statistics.critical == 0 and statistics.high == 0 %}
+   - No critical or high findings — maintain current security posture.
+{% endif %}
+
+2. **Security Hardening:**
+   - Restrict access to sensitive paths discovered during enumeration.
+   - Implement proper authentication and access controls.
+   - Remove or secure exposed backup files and configuration files.
+
+3. **Technology Updates:**
+   - Keep all detected technologies up to date with security patches.
+   - Review end-of-life technologies and plan migration.
+
+4. **Monitoring:**
+   - Implement continuous security monitoring.
+   - Set up alerts for critical vulnerabilities.
+   - Schedule regular security assessments.
+
+5. **Best Practices:**
+   - Implement proper error handling to avoid information disclosure.
+   - Use security headers (HSTS, CSP, X-Frame-Options, etc.).
+   - Conduct regular penetration testing.
+
+---
+
+## 📝 Notes
+
+- This scan was performed using automated tools and may contain false positives.
+- Manual verification of all findings is strongly recommended.
+- Results are based on the tools and configurations available at scan time.
+
+---
+
+## ⚖️ Legal Notice
+
+**⚠️ This scan was performed for authorized security testing purposes only.**
+
+- Only execute against targets you own or have explicit written permission to test.
+- Unauthorized scanning is illegal and may result in criminal charges.
+- The authors and contributors of this tool are not responsible for misuse.
+
+---
+
+## 📄 Report Metadata
+
+| Field | Value |
+|-------|-------|
+| **Generated by** | Reconner v2.0.0 |
+| **Scan Date** | {{ scan_date }} |
+| **Target** | {{ target_domain }} |
+| **Report Format** | Markdown |
+| **Structured Data** | `summary.json` |
+| **Quick Summary** | `highlights.txt` |
+
+---
+
+*End of Report*

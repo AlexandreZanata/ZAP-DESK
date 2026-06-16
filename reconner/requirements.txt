@@ -1,0 +1,9 @@
+# Core runtime dependencies
+click>=8.0.0
+jinja2>=3.0.0
+reportlab>=3.6.0
+markdown>=3.4.0
+rich>=10.0.0
+
+# Optional: higher-quality PDF generation
+# weasyprint>=57.0
