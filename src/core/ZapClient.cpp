@@ -15,9 +15,19 @@ void ZapClient::setBaseUrl(const QString& url) { m_baseUrl = url; }
 
 QString ZapClient::baseUrl() const { return m_baseUrl; }
 
+void ZapClient::setApiKey(const QString& key) { m_apiKey = key; }
+
+QString ZapClient::apiKey() const { return m_apiKey; }
+
+QString ZapClient::authenticatedPath(const QString& path) const {
+    if (m_apiKey.isEmpty()) return path;
+    const QChar sep = path.contains('?') ? '&' : '?';
+    return path + sep + "apikey=" + QString::fromUtf8(QUrl::toPercentEncoding(m_apiKey));
+}
+
 void ZapClient::get(const QString& path, std::function<void(bool, QString)> callback) {
     auto* nam = new QNetworkAccessManager(this);
-    QNetworkRequest req{QUrl(m_baseUrl + path)};
+    QNetworkRequest req{QUrl(m_baseUrl + authenticatedPath(path))};
     auto* reply = nam->get(req);
 
     connect(reply, &QNetworkReply::finished, this, [reply, nam, callback]() {
@@ -31,7 +41,7 @@ void ZapClient::get(const QString& path, std::function<void(bool, QString)> call
 
 void ZapClient::post(const QString& path, std::function<void(bool, QString)> callback) {
     auto* nam = new QNetworkAccessManager(this);
-    QNetworkRequest req{QUrl(m_baseUrl + path)};
+    QNetworkRequest req{QUrl(m_baseUrl + authenticatedPath(path))};
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
     auto* reply = nam->post(req, QByteArray{});
 

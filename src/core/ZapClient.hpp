@@ -21,6 +21,10 @@ public:
     void setBaseUrl(const QString& url);
     QString baseUrl() const;
 
+    void setApiKey(const QString& key);
+    QString apiKey() const;
+    QString authenticatedPath(const QString& path) const;
+
     void checkConnection(std::function<void(bool, QString)> callback);
     void accessUrl(const QString& url, std::function<void(bool, QString)> callback);
     void startAjaxSpider(const QString& url, std::function<void(bool, QString)> callback);
@@ -33,6 +37,7 @@ public:
 
 private:
     QString m_baseUrl{"http://127.0.0.1:8080"};
+    QString m_apiKey;
 
     void get(const QString& path, std::function<void(bool, QString)> callback);
     void post(const QString& path, std::function<void(bool, QString)> callback);

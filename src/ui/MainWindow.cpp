@@ -33,8 +33,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     connect(&m_pollTimer, &QTimer::timeout, this, &MainWindow::onPollStatus);
     m_pollTimer.start(2000);
 
-    appendLog("ZAP-DESK v0.5.0 — security terminal online");
+    appendLog("ZAP-DESK v0.6.0 — security terminal online");
     appendLog("Reconner path: " + AppConfig::instance().reconnerDir());
+    if (AppConfig::instance().zapApiKey().isEmpty() && !AppConfig::instance().zapDevMode()) {
+        appendLog(">> Security: enable dev mode in Settings for localhost without API key.");
+    }
     setConnectedUi(m_app.isZapRunning());
     if (m_app.isZapRunning()) m_app.checkZapConnection();
 }
@@ -148,7 +151,7 @@ void MainWindow::setupUi() {
     outer->addWidget(m_history);
 
     auto* mainColumn = new QVBoxLayout;
-    m_statusBanner = new components::StatusBanner("0.5.0");
+    m_statusBanner = new components::StatusBanner("0.6.0");
     mainColumn->addWidget(m_statusBanner);
 
     m_tabs = new QTabWidget;

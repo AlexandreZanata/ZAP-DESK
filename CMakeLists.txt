@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(ZAP-DESK VERSION 0.5.0 LANGUAGES CXX)
+project(ZAP-DESK VERSION 0.6.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -43,6 +43,12 @@ set(COMPONENT_SOURCES
     src/components/SettingsDialog.cpp
 )
 
+set(SECURITY_SOURCES
+    src/security/CredentialStore.cpp
+    src/security/AuditLogger.cpp
+    src/security/ReconRateLimiter.cpp
+)
+
 set(APP_SOURCES
     src/main.cpp
     src/config/AppConfig.cpp
@@ -57,6 +63,7 @@ set(APP_SOURCES
     src/presentation/ApplicationFacade.cpp
     src/ui/MainWindow.cpp
     ${COMPONENT_SOURCES}
+    ${SECURITY_SOURCES}
     ${DOMAIN_SOURCES}
 )
 
@@ -94,11 +101,16 @@ set(UNIT_TEST_SOURCES
     tests/unit/test_scan_entity.cpp
     tests/unit/test_risk_level.cpp
     tests/unit/test_summary_reader.cpp
+    tests/unit/test_zap_client_auth.cpp
+    tests/unit/test_recon_rate_limiter.cpp
+    tests/unit/test_audit_logger.cpp
 )
 
 add_executable(zap-desk-unit-tests
     ${UNIT_TEST_SOURCES}
     ${DOMAIN_SOURCES}
+    src/core/ZapClient.cpp
+    ${SECURITY_SOURCES}
 )
 
 target_include_directories(zap-desk-unit-tests PRIVATE
@@ -109,6 +121,7 @@ target_include_directories(zap-desk-unit-tests PRIVATE
 target_link_libraries(zap-desk-unit-tests PRIVATE
     GTest::gtest_main
     Qt6::Core
+    Qt6::Network
 )
 
 include(GoogleTest)

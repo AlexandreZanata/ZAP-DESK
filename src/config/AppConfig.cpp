@@ -1,5 +1,7 @@
 #include "AppConfig.hpp"
 
+#include "security/CredentialStore.hpp"
+
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
@@ -142,4 +144,22 @@ int AppConfig::zapApiPort() const {
 bool AppConfig::crtOverlayEnabled() const {
     QSettings settings;
     return settings.value("ui/crtOverlay", true).toBool();
+}
+
+QString AppConfig::zapApiKey() const {
+    return security::CredentialStore::zapApiKey();
+}
+
+bool AppConfig::zapDevMode() const {
+    QSettings settings;
+    return settings.value("security/devMode", false).toBool();
+}
+
+int AppConfig::reconRateLimitSeconds() const {
+    QSettings settings;
+    return settings.value("security/reconRateLimit", 30).toInt();
+}
+
+QString AppConfig::auditLogPath() const {
+    return QDir(dataDir()).filePath("audit.log");
 }

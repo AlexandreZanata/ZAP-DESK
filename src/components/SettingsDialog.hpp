@@ -22,6 +22,9 @@ private:
     QSpinBox* m_zapPort{};
     QLineEdit* m_resultsDir{};
     QLineEdit* m_reconnerDir{};
+    QLineEdit* m_zapApiKey{};
+    QCheckBox* m_zapDevMode{};
+    QSpinBox* m_reconRateLimit{};
     QCheckBox* m_crtOverlay{};
 };
 

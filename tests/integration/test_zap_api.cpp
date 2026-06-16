@@ -12,6 +12,9 @@ bool zapReachable() {
     QEventLoop loop;
     bool ok = false;
     ZapClient client;
+    if (qEnvironmentVariableIsSet("ZAP_API_KEY")) {
+        client.setApiKey(qEnvironmentVariable("ZAP_API_KEY"));
+    }
     client.checkConnection([&](bool connected, const QString&) {
         ok = connected;
         loop.quit();
@@ -31,6 +34,9 @@ TEST(ZapApiIntegration, VersionEndpoint) {
     QEventLoop loop;
     QString version;
     ZapClient client;
+    if (qEnvironmentVariableIsSet("ZAP_API_KEY")) {
+        client.setApiKey(qEnvironmentVariable("ZAP_API_KEY"));
+    }
     client.checkConnection([&](bool ok, const QString& v) {
         ASSERT_TRUE(ok);
         version = v;

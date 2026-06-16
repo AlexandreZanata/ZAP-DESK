@@ -137,7 +137,7 @@ The `summary.json` file is the handshake between Reconner and ZAP-DESK:
 ## SECURITY
 
 - Recon **only** with written authorization checkbox in the UI
-- Local ZAP with `api.disablekey=true` in dev only — production must use an API key
+- Local ZAP with `api.disablekey=true` in **dev mode only** — production uses API key (see [Phase 6 Security](PHASE6-SECURITY.md))
 - Never log credentials or tokens
 - Configurable paths via env — no hardcoded machine paths
 

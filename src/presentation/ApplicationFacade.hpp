@@ -13,6 +13,9 @@
 #include "services/ReconRunner.hpp"
 #include "services/ZapUpdater.hpp"
 
+#include "security/AuditLogger.hpp"
+#include "security/ReconRateLimiter.hpp"
+
 #include <QObject>
 #include <optional>
 
@@ -69,6 +72,7 @@ signals:
 
 private:
     void wireServices();
+    void applyClientSecurity();
     void launchValidatedRecon(const application::ValidatedReconStart& validated);
     QString formatSummary(const std::string& summaryPath) const;
     void feedZapAndScan(const std::string& summaryPath);
@@ -83,6 +87,9 @@ private:
     infrastructure::QtReconGateway m_reconGateway;
     infrastructure::QtPreflightGateway m_preflightGateway;
     infrastructure::QtZapGateway m_zapGateway;
+
+    security::AuditLogger m_audit;
+    security::ReconRateLimiter m_reconLimiter;
 
     std::optional<domain::Scan> m_activeScan;
     bool m_fullPipelinePending{false};

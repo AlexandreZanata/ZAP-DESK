@@ -2,7 +2,7 @@
 
 Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 
-**Current phase: Phase 6 (Security Hardening)** — UI Components complete.
+**Current phase: Phase 7 (Packaging & Release)** — Security Hardening complete.
 
 ---
 
@@ -16,8 +16,8 @@ Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 | 3 | Domain & Architecture | ✅ Done | Clean architecture, Result type, use cases, facade |
 | 4 | Testing & CI | ✅ Done | GoogleTest, pytest coverage, CI pipeline |
 | 5 | UI Components | ✅ Done | Reusable widgets, unified findings view |
-| 6 | Security Hardening | 🔄 Current | API key support, secure defaults |
-| 7 | Packaging & Release | ⏳ Pending | AppImage/deb, installer, auto-update polish |
+| 6 | Security Hardening | ✅ Done | API key support, secure defaults |
+| 7 | Packaging & Release | 🔄 Current | AppImage/deb, installer, auto-update polish |
 
 ---
 
@@ -116,20 +116,23 @@ Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 
 ---
 
-## Phase 6 — Security Hardening 🔄 (CURRENT)
+## Phase 6 — Security Hardening ✅
 
-**Planned:**
-- ZAP API key support in `ZapClient` and settings UI
-- Remove `api.disablekey=true` from production profile
-- Secure credential storage (optional keyring integration)
-- Audit log for scan actions
-- Rate limiting on recon launches
+**Delivered:**
+- `ZapClient` API key on all REST calls (`apikey` query param)
+- `CredentialStore` — env `ZAP_API_KEY` + QSettings persistence
+- `ZapDaemon` production profile — `api.disablekey=true` only in dev mode
+- Settings UI: API key, dev mode toggle, recon rate limit
+- `AuditLogger` — `~/.local/share/zap-desk/audit.log`
+- `ReconRateLimiter` — configurable cooldown (default 30s)
+- Unit tests: `test_zap_client_auth`, `test_audit_logger`, `test_recon_rate_limiter`
+- [Phase 6 security guide](PHASE6-SECURITY.md)
 
-**Exit criteria:** Safe defaults for non-localhost use; API key documented.
+**Exit criteria:** Safe defaults for non-localhost use; API key documented. ✅
 
 ---
 
-## Phase 7 — Packaging & Release ⏳
+## Phase 7 — Packaging & Release 🔄 (CURRENT)
 
 **Planned:**
 - AppImage or `.deb` package
@@ -142,14 +145,14 @@ Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 
 ---
 
-## What to work on next (Phase 6 backlog)
+## What to work on next (Phase 7 backlog)
 
 Priority order:
 
-1. ZAP API key support in `ZapClient` and settings UI
-2. Remove `api.disablekey=true` from production profile
-3. Secure credential storage (optional keyring)
-4. Audit log for scan actions
+1. AppImage or `.deb` package
+2. Desktop entry (`zap-desk.desktop`)
+3. Bundled install script for ZAP + recon tools
+4. GitHub release workflow (tag → build → artifacts)
 
 ---
 
@@ -159,4 +162,5 @@ Priority order:
 - [ZAP Install (Linux)](ZAP-INSTALL-LINUX.md)
 - [Integration](INTEGRATION.md)
 - [Phase 5 UI](PHASE5-UI.md)
+- [Phase 6 Security](PHASE6-SECURITY.md)
 - [Stack](STACK.md)

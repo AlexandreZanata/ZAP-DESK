@@ -6,15 +6,25 @@
 #include "application/usecases/StartZapScanUseCase.hpp"
 #include "config/AppConfig.hpp"
 
+#include <QStringList>
+
 namespace presentation {
 
 ApplicationFacade::ApplicationFacade(QObject* parent)
     : QObject(parent),
       m_reconGateway(&m_recon, this),
       m_preflightGateway(&m_preflight, this),
-      m_zapGateway(&m_client, &m_daemon, &m_updater, this) {
-    m_client.setBaseUrl(AppConfig::instance().zapApiUrl());
+      m_zapGateway(&m_client, &m_daemon, &m_updater, this),
+      m_audit(AppConfig::instance().auditLogPath()),
+      m_reconLimiter(AppConfig::instance().reconRateLimitSeconds()) {
+    applyClientSecurity();
     wireServices();
+}
+
+void ApplicationFacade::applyClientSecurity() {
+    m_client.setBaseUrl(AppConfig::instance().zapApiUrl());
+    m_client.setApiKey(AppConfig::instance().zapApiKey());
+    m_reconLimiter.setMinIntervalSeconds(AppConfig::instance().reconRateLimitSeconds());
 }
 
 void ApplicationFacade::wireServices() {
@@ -50,11 +60,13 @@ bool ApplicationFacade::isZapRunning() const {
 }
 
 void ApplicationFacade::bootZap() {
+    m_audit.log("BOOT_ZAP");
     emit logMessage(">> Starting ZAP engine...");
     m_zapGateway.boot();
 }
 
 void ApplicationFacade::shutdownZap() {
+    m_audit.log("SHUTDOWN_ZAP");
     m_zapGateway.shutdown();
 }
 
@@ -72,6 +84,7 @@ void ApplicationFacade::startAjaxScan(const QString& targetUrl) {
     }
 
     const std::string url = validated.value();
+    m_audit.log("AJAX_SCAN", QString::fromStdString(url));
     emit logMessage(QString(">> AJAX SPIDER → %1").arg(QString::fromStdString(url)));
     m_zapGateway.accessUrl(url, [this, url](bool ok, const std::string& err) {
         if (!ok) {
@@ -93,6 +106,7 @@ void ApplicationFacade::startActiveScan(const QString& targetUrl) {
     }
 
     const std::string url = validated.value();
+    m_audit.log("ACTIVE_SCAN", QString::fromStdString(url));
     emit logMessage(QString(">> ACTIVE SCAN → %1").arg(QString::fromStdString(url)));
     m_zapGateway.startActiveScan(url, [this](bool ok, const std::string& msg) {
         emit logMessage(ok ? ">> ACTIVE SCAN started."
@@ -101,6 +115,7 @@ void ApplicationFacade::startActiveScan(const QString& targetUrl) {
 }
 
 void ApplicationFacade::stopScans() {
+    m_audit.log("STOP_SCANS");
     m_zapGateway.stopScans();
     emit logMessage(">> AJAX SPIDER aborted.");
     emit logMessage(">> ACTIVE SCAN aborted.");
@@ -170,6 +185,7 @@ QString ApplicationFacade::formatSummary(const std::string& summaryPath) const {
 }
 
 void ApplicationFacade::launchValidatedRecon(const application::ValidatedReconStart& validated) {
+    m_reconLimiter.recordStart();
     m_activeScan = validated.scan;
     m_activeScan->markRunning();
     m_reconGateway.start(validated.options);
@@ -177,6 +193,12 @@ void ApplicationFacade::launchValidatedRecon(const application::ValidatedReconSt
 
 void ApplicationFacade::startRecon(const QString& targetUrl, bool authorized, bool fastMode,
                                    bool skipNuclei, bool useZapProxy) {
+    QString rateReason;
+    if (!m_reconLimiter.canStart(&rateReason)) {
+        emit operationFailed(rateReason);
+        return;
+    }
+
     application::StartReconRequest request{
         targetUrl.toStdString(), authorized, fastMode, skipNuclei, useZapProxy};
 
@@ -186,6 +208,7 @@ void ApplicationFacade::startRecon(const QString& targetUrl, bool authorized, bo
         return;
     }
 
+    m_audit.log("START_RECON", targetUrl);
     emit logMessage(">> Running preflight checks...");
     m_preflightGateway.check([this, validated](const domain::PreflightReport& report) {
         if (!report.ok) {
@@ -205,6 +228,7 @@ void ApplicationFacade::startRecon(const QString& targetUrl, bool authorized, bo
 }
 
 void ApplicationFacade::stopRecon() {
+    m_audit.log("STOP_RECON");
     m_reconGateway.stop();
     if (m_activeScan) m_activeScan->markCancelled();
 }
@@ -223,6 +247,7 @@ void ApplicationFacade::feedZapAndScan(const std::string& summaryPath) {
         return;
     }
 
+    m_audit.log("FEED_ZAP", QString::fromStdString(summaryPath));
     emit logMessage(">> Feeding ZAP with recon URLs...");
 
     struct FeedState {
@@ -264,6 +289,7 @@ void ApplicationFacade::feedZapFromLastRecon() {
 }
 
 void ApplicationFacade::checkZapUpdate() {
+    m_audit.log("CHECK_ZAP_UPDATE");
     emit logMessage(">> Checking OWASP ZAP updates...");
     m_zapGateway.checkForUpdates([this](const domain::ZapUpdateInfo& info) {
         if (info.latestVersion.empty()) {
@@ -277,6 +303,7 @@ void ApplicationFacade::checkZapUpdate() {
 }
 
 void ApplicationFacade::runZapUpdate() {
+    m_audit.log("RUN_ZAP_UPDATE");
     m_zapGateway.runUpdateScript([this](bool ok, const std::string& err) {
         emit logMessage(ok ? ">> ZAP updated successfully." : QString(">> ") + QString::fromStdString(err));
     });
@@ -293,6 +320,7 @@ void ApplicationFacade::runFullPipeline(const QString& targetUrl, bool authorize
         return;
     }
 
+    m_audit.log("FULL_PIPELINE", targetUrl);
     emit logMessage(">> FULL PIPELINE: ZAP BOOT → RECON → FEED → ACTIVE SCAN");
     m_fullPipelinePending = true;
 
@@ -316,7 +344,7 @@ void ApplicationFacade::runFullPipeline(const QString& targetUrl, bool authorize
 
 void ApplicationFacade::reloadFromConfig() {
     AppConfig::instance().reload();
-    m_client.setBaseUrl(AppConfig::instance().zapApiUrl());
+    applyClientSecurity();
 }
 
 }  // namespace presentation

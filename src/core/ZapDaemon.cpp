@@ -14,7 +14,7 @@ ZapDaemon::ZapDaemon(QObject* parent) : QObject(parent) {
 
     connect(&m_process, &QProcess::started, this, [this]() {
         writePid(m_process.processId());
-        emit logMessage("ZAP started in daemon mode (port 8080)");
+        emit logMessage(QString("ZAP started in daemon mode (port %1)").arg(port));
         emit stateChanged(true);
     });
 
@@ -60,7 +60,21 @@ void ZapDaemon::start() {
 
     const int port = cfg.zapApiPort();
     m_process.setProgram(m_launchScript);
-    m_process.setArguments({"-daemon", "-port", QString::number(port), "-config", "api.disablekey=true"});
+
+    QStringList args{"-daemon", "-port", QString::number(port)};
+    const QString apiKey = cfg.zapApiKey();
+    if (cfg.zapDevMode() && apiKey.isEmpty()) {
+        args << "-config" << "api.disablekey=true";
+        emit logMessage("ZAP dev mode: API key check disabled (localhost only).");
+    } else if (!apiKey.isEmpty()) {
+        args << "-config" << ("api.key=" + apiKey);
+        emit logMessage("ZAP starting with configured API key.");
+    } else {
+        emit logMessage(
+            "Warning: production profile — no API key. Set key in Settings or enable dev mode.");
+    }
+
+    m_process.setArguments(args);
     m_process.start();
 }
 

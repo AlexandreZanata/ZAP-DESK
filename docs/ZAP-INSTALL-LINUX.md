@@ -206,19 +206,22 @@ The project `scripts/zap-launch.sh`:
 - Configures Chromium + ChromeDriver for the **AJAX Spider**
 - Forwards extra arguments (`-daemon`, `-port`, etc.)
 
-`ZapDaemon` (C++) invokes:
+`ZapDaemon` (C++) invokes `scripts/zap-launch.sh` with security-aware flags:
 
-```bash
-scripts/zap-launch.sh -daemon -port 8080 -config api.disablekey=true
-```
+| Profile | Daemon flags |
+|---------|----------------|
+| **Dev mode** (Settings, no API key) | `-config api.disablekey=true` |
+| **Production** (API key set) | `-config api.key=<your-key>` |
+| **Production** (no key) | No disablekey — configure key in ZAP-DESK Settings |
 
 | Flag | Meaning |
 |------|---------|
 | `-daemon` | No ZAP GUI (headless) |
 | `-port 8080` | REST API on port 8080 |
-| `api.disablekey=true` | Local API without key (dev/localhost only) |
+| `api.disablekey=true` | Local API without key (**dev/localhost only**) |
+| `api.key=...` | ZAP API key for authenticated requests |
 
-> **Production:** remove `api.disablekey=true` and configure an API key in ZAP. ZAP-DESK does not send an API key yet — plan for this before exposing the network.
+> **Production:** disable dev mode in **File → Settings**, set a ZAP API key, and restart ZAP. `ZapClient` sends `apikey=` on every REST call. Override via `ZAP_API_KEY` environment variable.
 
 ### 4. Build and run ZAP-DESK
 
@@ -323,7 +326,12 @@ curl "http://127.0.0.1:8080/JSON/ajaxSpider/view/status/"
 ### 1. Start manually (terminal)
 
 ```bash
+# Dev / localhost (no API key):
 "$ZAP_LAUNCH_SCRIPT" -daemon -port 8080 -config api.disablekey=true
+
+# Production (with API key):
+"$ZAP_LAUNCH_SCRIPT" -daemon -port 8080 -config api.key=YOUR_KEY_HERE
+```
 ```
 
 ### 2. Verify API
@@ -463,8 +471,8 @@ export ZAP_API_PORT=8090
 ### API returns error / ZAP "OFFLINE"
 
 - Wait 10–30 s after BOOT ZAP (JVM startup is slow)
-- Confirm `api.disablekey=true` if you have not configured an API key
-- Test: `curl http://127.0.0.1:8080/JSON/core/view/version/`
+- Enable **dev mode** in Settings if you have no API key, or set `ZAP_API_KEY` / configure key in Settings
+- Test: `curl http://127.0.0.1:8080/JSON/core/view/version/` (add `?apikey=...` in production)
 
 ### AJAX Spider does not start
 
@@ -496,8 +504,9 @@ export ZAP_DESK_HOME="$HOME/WebstormProjects/ZAP-DESK"
 export ZAP_CONFIG_DIR="$HOME/.local/share/zap-desk/config/home"
 export ZAP_LAUNCH_SCRIPT="$ZAP_DESK_HOME/scripts/zap-launch.sh"
 
-# Start ZAP manually
+# Start ZAP manually (dev mode)
 "$ZAP_LAUNCH_SCRIPT" -daemon -port 8080 -config api.disablekey=true
+# Or with API key: -config api.key=YOUR_KEY_HERE
 
 # Test API
 curl -s "http://127.0.0.1:8080/JSON/core/view/version/"

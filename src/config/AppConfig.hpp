@@ -18,6 +18,10 @@ public:
     QString zapApiUrl() const;
     int zapApiPort() const;
     bool crtOverlayEnabled() const;
+    QString zapApiKey() const;
+    bool zapDevMode() const;
+    int reconRateLimitSeconds() const;
+    QString auditLogPath() const;
 
     void reload();
 
