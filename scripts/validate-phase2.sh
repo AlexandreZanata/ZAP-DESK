@@ -111,6 +111,13 @@ if command -v cmake >/dev/null && command -v g++ >/dev/null; then
     if (cd build && cmake .. -DCMAKE_BUILD_TYPE=Release >/dev/null && cmake --build . -j"$(nproc)" >/dev/null); then
       ok "cmake build"
       if [ -x build/zap-desk ]; then ok "zap-desk binary"; else bad "binary missing"; fi
+      if [ -x build/zap-desk-unit-tests ]; then
+        if (cd build && ctest --output-on-failure -R zap-desk-unit-tests >/dev/null); then
+          ok "GoogleTest unit suite"
+        else
+          bad "GoogleTest unit suite failed"
+        fi
+      fi
     else
       bad "cmake build failed"
     fi

@@ -7,7 +7,7 @@ on:
     branches: [main, master]
 
 jobs:
-  build-cpp:
+  test-cpp:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,10 +17,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake build-essential qt6-base-dev qt6-tools-dev-tools
 
-      - name: Build
+      - name: Configure and build
         run: |
-          mkdir -p build
-          cd build && cmake .. -DCMAKE_BUILD_TYPE=Release && cmake --build . -j$(nproc)
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build -j$(nproc)
+
+      - name: Run C++ unit tests (GoogleTest)
+        run: |
+          cd build
+          ctest --output-on-failure -R zap-desk-unit-tests
 
   test-reconner:
     runs-on: ubuntu-latest
@@ -37,7 +42,28 @@ jobs:
           cd reconner
           pip install -e ".[dev]"
 
-      - name: Run tests
+      - name: Run tests with coverage
         run: |
           cd reconner
-          pytest tests/ -q
+          pytest tests/ -q --cov=reconner --cov-report=term-missing
+
+  validate-phase2:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential qt6-base-dev qt6-tools-dev-tools
+          cd reconner && pip install -e ".[dev]"
+
+      - name: Run Phase 2 validation
+        run: |
+          chmod +x scripts/validate-phase2.sh
+          ./scripts/validate-phase2.sh

@@ -2,7 +2,7 @@
 
 Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 
-**Current phase: Phase 4 (Testing & CI)** — Domain layer complete; expand automated tests.
+**Current phase: Phase 5 (UI Components)** — Testing & CI complete.
 
 ---
 
@@ -14,9 +14,8 @@ Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 | 1 | ZAP Desktop Shell | ✅ Done | Qt UI, ZapClient, ZapDaemon, 90s hacker theme |
 | 2 | Integration Layer | ✅ Done | ReconRunner, ReconBridge, ZapUpdater, Full Pipeline |
 | 3 | Domain & Architecture | ✅ Done | Clean architecture, Result type, use cases, facade |
-| 4 | Testing & CI | 🔄 Current | GoogleTest, expanded pytest, coverage gates |
-| 4 | Testing & CI | ⏳ Pending | GoogleTest, expanded pytest, coverage gates |
-| 5 | UI Components | ⏳ Pending | Reusable widgets, unified findings view |
+| 4 | Testing & CI | ✅ Done | GoogleTest, pytest coverage, CI pipeline |
+| 5 | UI Components | 🔄 Current | Reusable widgets, unified findings view |
 | 6 | Security Hardening | ⏳ Pending | API key support, secure defaults |
 | 7 | Packaging & Release | ⏳ Pending | AppImage/deb, installer, auto-update polish |
 
@@ -88,20 +87,22 @@ Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 
 ---
 
-## Phase 4 — Testing & CI 🔄 (CURRENT)
+## Phase 4 — Testing & CI ✅
 
-**Planned:**
-- `tests/unit/` — GoogleTest for ZapClient mocks, ReconBridge JSON parsing
-- `tests/integration/` — ZAP API integration (optional, needs ZAP in CI)
-- Expand `reconner/tests/` coverage
-- Coverage thresholds in CI (80% target)
-- `make test` runs C++ and Python suites
+**Delivered:**
+- GoogleTest via CMake FetchContent (`zap-desk-unit-tests`)
+- Unit tests: `TargetUrl`, use cases, `Scan`, `RiskLevel`, `JsonReconSummaryReader`
+- Optional ZAP integration test (`ZAP_DESK_ENABLE_INTEGRATION_TESTS`)
+- Reconner: `test_zap_desk_runner.py` + `pytest.ini` coverage gate (70%)
+- CI: `test-cpp` (ctest), `test-reconner` (coverage), `validate-phase2`
+- `make test`, `make test-unit`, `make validate-phase4`
+- [Phase 4 testing guide](PHASE4-TESTING.md)
 
-**Exit criteria:** CI green on every PR; core services have unit tests.
+**Exit criteria:** CI green on every PR; core services have unit tests. ✅
 
 ---
 
-## Phase 5 — UI Components ⏳
+## Phase 5 — UI Components 🔄 (CURRENT)
 
 **Planned:**
 - `src/components/` — `AlertTable`, `LogConsole`, `ScanProgressBar`, `ReconSummaryPanel`
@@ -140,15 +141,15 @@ Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 
 ---
 
-## What to work on next (Phase 4 backlog)
+## What to work on next (Phase 5 backlog)
 
 Priority order:
 
-1. Expand `tests/unit/` with use-case mocks
-2. Wire `make test` to always run `zap-desk-domain-tests`
-3. Add CI job for domain tests
-4. Coverage thresholds (80% target)
-5. Operator sign-off: FULL PIPELINE on authorized target
+1. Extract `LogConsole` widget from `MainWindow`
+2. Extract `AlertTable` component
+3. `ReconSummaryPanel` for post-scan stats
+4. Unified findings view (ZAP + nuclei)
+5. Settings dialog (paths, port, proxy)
 
 ---
 

@@ -6,7 +6,7 @@ Unifies **OWASP ZAP** (spider, active scan, alerts) with **Reconner** (automated
 
 ```
 ╔══════════════════════════════════════════════════════════╗
-║  ZAP-DESK // RECONNER — SECURITY TERMINAL v0.2.0         ║
+║  ZAP-DESK // RECONNER — SECURITY TERMINAL v0.3.0         ║
 ║  [ OWASP ZAP + RECON PIPELINE ]  :: LINUX EDITION ::    ║
 ╚══════════════════════════════════════════════════════════╝
 ```
@@ -39,6 +39,7 @@ cd ZAP-DESK
 make install-deps      # Qt6, cmake, build-essential
 make install-reconner  # pip install reconner
 make build
+make test              # GoogleTest + reconner pytest
 make dev               # run zap-desk
 ```
 
@@ -47,7 +48,7 @@ make dev               # run zap-desk
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `ZAP_DESK_HOME` | auto-detect | Project root |
-| `ZAP_HOME` | `/data/dev/tools/zap` | ZAP installation |
+| `ZAP_HOME` | `~/.local/share/zap-desk/zap` | ZAP installation |
 | `ZAP_LAUNCH_SCRIPT` | `scripts/zap-launch.sh` | ZAP launcher |
 | `ZAP_API_PORT` | `8080` | ZAP API port |
 | `RECONNER_DIR` | `<root>/reconner` | Recon engine |
@@ -70,8 +71,8 @@ ZAP-DESK/
 - [Architecture](docs/ARCHITECTURE.md)
 - [Stack](docs/STACK.md)
 - [ZAP + Reconner integration](docs/INTEGRATION.md)
-- [Phase 3 architecture](docs/PHASE3-ARCHITECTURE.md)
 - [Development roadmap](docs/ROADMAP.md)
+- [Phase 4 testing](docs/PHASE4-TESTING.md)
 - [Phase 2 validation](docs/PHASE2-VALIDATION.md)
 
 ## Update OWASP ZAP
