@@ -2,7 +2,7 @@
 # Download and install the latest OWASP ZAP release for Linux
 set -euo pipefail
 
-ZAP_HOME="${ZAP_HOME:-/data/dev/tools/zap}"
+ZAP_HOME="${ZAP_HOME:-${HOME}/.local/share/zap-desk/zap}"
 TMP_DIR="${TMPDIR:-/tmp}/zap-desk-update"
 API_URL="https://api.github.com/repos/zaproxy/zap/releases/latest"
 

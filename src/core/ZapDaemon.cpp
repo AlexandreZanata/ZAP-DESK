@@ -3,6 +3,7 @@
 #include "config/AppConfig.hpp"
 
 #include <QFile>
+#include <QFileInfo>
 #include <QTextStream>
 #include <csignal>
 
@@ -44,7 +45,20 @@ void ZapDaemon::start() {
         return;
     }
 
-    const int port = AppConfig::instance().zapApiPort();
+    if (m_launchScript.isEmpty() || !QFileInfo::exists(m_launchScript)) {
+        emit logMessage("Error: zap-launch.sh not found. Set ZAP_LAUNCH_SCRIPT or build from repo root.");
+        emit stateChanged(false);
+        return;
+    }
+
+    const auto& cfg = AppConfig::instance();
+    if (!QFileInfo::exists(cfg.zapHome() + "/zap.sh")) {
+        emit logMessage("Error: ZAP not installed at " + cfg.zapHome() + " — run: make update-zap");
+        emit stateChanged(false);
+        return;
+    }
+
+    const int port = cfg.zapApiPort();
     m_process.setProgram(m_launchScript);
     m_process.setArguments({"-daemon", "-port", QString::number(port), "-config", "api.disablekey=true"});
     m_process.start();

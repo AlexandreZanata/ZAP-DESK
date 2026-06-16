@@ -4,12 +4,17 @@
 
 #include <QDir>
 #include <QFileInfo>
+#include <QRegularExpression>
+
+namespace {
+constexpr const char* kDeskPrefix = "@@ZAP-DESK@@PHASE|";
+}
 
 ReconRunner::ReconRunner(QObject* parent) : QObject(parent) {
     connect(&m_process, &QProcess::readyReadStandardOutput, this, [this]() {
-        const QString output = QString::fromUtf8(m_process.readAllStandardOutput()).trimmed();
+        const QString output = QString::fromUtf8(m_process.readAllStandardOutput());
         for (const QString& line : output.split('\n', Qt::SkipEmptyParts)) {
-            emit logLine(line);
+            handleOutputLine(line.trimmed());
         }
     });
 
@@ -50,6 +55,30 @@ QString ReconRunner::lastSummaryPath() const {
     return m_lastSummaryPath;
 }
 
+QString ReconRunner::currentPhase() const {
+    return m_currentPhase;
+}
+
+void ReconRunner::handleOutputLine(const QString& line) {
+    if (line.startsWith(kDeskPrefix)) {
+        const QString payload = line.mid(int(qstrlen(kDeskPrefix)));
+        const QStringList parts = payload.split('|');
+        if (parts.size() >= 4) {
+            const int step = parts[0].toInt();
+            const int total = parts[1].toInt();
+            m_currentPhase = parts[2];
+            const QString message = parts.mid(3).join('|');
+            emit phaseChanged(step, total, m_currentPhase, message);
+            emit logLine(QString(">> [%1/%2] %3 — %4").arg(step).arg(total).arg(m_currentPhase, message));
+            return;
+        }
+    }
+
+    if (!line.isEmpty()) {
+        emit logLine(line);
+    }
+}
+
 void ReconRunner::start(const QString& target, bool fastMode, bool skipNuclei, bool useZapProxy) {
     if (m_state == State::Running) {
         emit logLine("Recon already running.");
@@ -59,6 +88,7 @@ void ReconRunner::start(const QString& target, bool fastMode, bool skipNuclei, b
     const auto& cfg = AppConfig::instance();
     m_lastOutputDir = cfg.resultsDir();
     m_lastSummaryPath.clear();
+    m_currentPhase.clear();
     setState(State::Running);
 
     QStringList args;
@@ -76,11 +106,11 @@ void ReconRunner::start(const QString& target, bool fastMode, bool skipNuclei, b
     m_process.setProgram("python3");
     m_process.setArguments(args);
     m_process.setWorkingDirectory(cfg.reconnerDir());
-    m_process.setProcessEnvironment([&cfg]() {
-        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-        env.insert("PYTHONPATH", cfg.reconnerDir());
-        return env;
-    }());
+
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    env.insert("PYTHONPATH", cfg.reconnerDir());
+    env.insert("ZAP_DESK_MODE", "1");
+    m_process.setProcessEnvironment(env);
 
     emit logLine(QString(">> reconner -t %1").arg(target));
     m_process.start();

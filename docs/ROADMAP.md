@@ -2,7 +2,7 @@
 
 Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 
-**Current phase: Phase 2 (Integration Layer)** — core services exist; polish, tests, and domain layer are next.
+**Current phase: Phase 3 (Domain & Architecture)** — Integration Layer complete; validate with [PHASE2-VALIDATION.md](PHASE2-VALIDATION.md).
 
 ---
 
@@ -12,8 +12,8 @@ Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 |-------|------|--------|------|
 | 0 | Foundation | ✅ Done | Monorepo, git, reconner vendored, docs scaffold |
 | 1 | ZAP Desktop Shell | ✅ Done | Qt UI, ZapClient, ZapDaemon, 90s hacker theme |
-| 2 | Integration Layer | 🔄 In progress | ReconRunner, ReconBridge, ZapUpdater, Full Pipeline |
-| 3 | Domain & Architecture | ⏳ Next | Clean architecture, Result type, entities |
+| 2 | Integration Layer | ✅ Done | ReconRunner, ReconBridge, ZapUpdater, Full Pipeline |
+| 3 | Domain & Architecture | 🔄 Current | Clean architecture, Result type, entities |
 | 4 | Testing & CI | ⏳ Pending | GoogleTest, expanded pytest, coverage gates |
 | 5 | UI Components | ⏳ Pending | Reusable widgets, unified findings view |
 | 6 | Security Hardening | ⏳ Pending | API key support, secure defaults |
@@ -44,28 +44,34 @@ Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 
 ---
 
-## Phase 2 — Integration Layer 🔄 (CURRENT)
+## Phase 2 — Integration Layer ✅
 
 **Delivered:**
-- `ReconRunner` — spawns `python3 -m reconner` with proxy support
+- `ReconRunner` — spawns `python3 -m reconner` with proxy + `ZAP_DESK_MODE` progress
 - `ReconBridge` — reads `summary.json`, seeds ZAP site tree
+- `ReconSummary` — parses and displays scan stats in UI
+- `ReconPreflight` — checks Python deps and external tools before recon
 - `ZapUpdater` — GitHub release check + `scripts/update-zap.sh`
 - RECON tab, FULL PIPELINE, authorization checkbox
+- XDG defaults (`~/.local/share/zap-desk/`) in AppConfig and scripts
 - [ZAP install guide](ZAP-INSTALL-LINUX.md)
+- [Phase 2 validation checklist](PHASE2-VALIDATION.md) + `scripts/validate-phase2.sh`
 
-**Remaining in this phase:**
-- [ ] Fix default `ZAP_HOME` paths (remove `/data/dev/...` hardcoded defaults in AppConfig)
-- [ ] Recon progress indicator in UI (parse reconner stdout / Rich output)
-- [ ] Display recon results summary in UI (hosts, ports, nuclei hits)
-- [ ] Error handling when reconner Python deps or external tools are missing
-- [ ] End-to-end manual test checklist documented
-- [ ] Verify FULL PIPELINE on real authorized target
+**Completed items:**
+- [x] Fix default `ZAP_HOME` paths (XDG `dataDir()`)
+- [x] Recon progress indicator (`@@ZAP-DESK@@PHASE` protocol)
+- [x] Display recon results summary in UI
+- [x] Preflight error handling for missing deps/tools
+- [x] End-to-end manual test checklist documented
+- [ ] Verify FULL PIPELINE on real authorized target *(operator sign-off)*
+
+**Validate:** `make validate-phase2` then follow [PHASE2-VALIDATION.md](PHASE2-VALIDATION.md).
 
 **Exit criteria:** Full pipeline works reliably on a clean Linux install following the install guide.
 
 ---
 
-## Phase 3 — Domain & Architecture ⏳
+## Phase 3 — Domain & Architecture 🔄 (CURRENT)
 
 **Planned:**
 - `src/domain/` — `Scan`, `Target`, `Alert` entities with invariants
@@ -130,15 +136,15 @@ Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 
 ---
 
-## What to work on next (Phase 2 backlog)
+## What to work on next (Phase 3 backlog)
 
 Priority order:
 
-1. **AppConfig defaults** — use `$HOME/.local/share/zap-desk/` instead of `/data/dev/tools/`
-2. **Recon progress in UI** — show phase name (subfinder, httpx, …) while running
-3. **Recon summary panel** — show `summary.json` stats after scan
-4. **Tool dependency check** — preflight before RUN RECON (subfinder, httpx, etc.)
-5. **Manual E2E test** — document and verify on authorized target
+1. **`src/shared/result/`** — `Result<T, E>` type
+2. **`src/domain/`** — `Scan`, `Target`, `Alert` entities
+3. **`src/application/`** — `StartReconUseCase`, `FeedZapUseCase`
+4. Refactor `MainWindow` to thin controller
+5. Operator sign-off: FULL PIPELINE on authorized target (closes Phase 2)
 
 ---
 

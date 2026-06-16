@@ -33,7 +33,7 @@ BOOT ZAP → RUN RECON (--proxy) → FEED ZAP (summary.json) → ACTIVE SCAN
 
 ## Current phase
 
-See `docs/ROADMAP.md` — **Phase 2: Integration Layer**.
+See `docs/ROADMAP.md` — **Phase 3: Domain & Architecture** (Phase 2 complete).
 
 ## Full docs
 

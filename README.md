@@ -71,6 +71,7 @@ ZAP-DESK/
 - [Stack](docs/STACK.md)
 - [ZAP + Reconner integration](docs/INTEGRATION.md)
 - [Development roadmap](docs/ROADMAP.md)
+- [Phase 2 validation](docs/PHASE2-VALIDATION.md)
 
 ## Update OWASP ZAP
 

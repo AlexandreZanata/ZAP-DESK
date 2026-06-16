@@ -1,4 +1,4 @@
-.PHONY: dev build test lint install-deps install-reconner update-zap clean
+.PHONY: dev build test lint install-deps install-reconner update-zap validate-phase2 clean
 
 BUILD_DIR := build
 CMAKE_FLAGS := -DCMAKE_BUILD_TYPE=Release
@@ -25,6 +25,9 @@ install-reconner:
 
 update-zap:
 	./scripts/update-zap.sh
+
+validate-phase2:
+	./scripts/validate-phase2.sh
 
 clean:
 	rm -rf $(BUILD_DIR)

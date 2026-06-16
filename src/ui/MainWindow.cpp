@@ -1,6 +1,7 @@
 #include "MainWindow.hpp"
 
 #include "config/AppConfig.hpp"
+#include "services/ReconSummary.hpp"
 
 #include <QCheckBox>
 #include <QDateTime>
@@ -30,11 +31,22 @@ MainWindow::MainWindow(QWidget* parent)
     });
 
     connect(&m_recon, &ReconRunner::logLine, this, &MainWindow::appendLog);
+    connect(&m_recon, &ReconRunner::phaseChanged, this,
+            [this](int step, int total, const QString& phase, const QString& message) {
+                m_reconProgressLabel->setText(
+                    QString(">> RECON [%1/%2] %3 — %4").arg(step).arg(total).arg(phase, message));
+            });
     connect(&m_recon, &ReconRunner::finished, this, [this](bool ok, const QString& summary) {
         m_reconBtn->setEnabled(true);
         m_stopReconBtn->setEnabled(false);
         m_feedZapBtn->setEnabled(ok && !summary.isEmpty());
-        appendLog(ok ? ">> RECON COMPLETE — " + summary : ">> RECON FAILED");
+        if (ok) {
+            showReconSummary(summary);
+            appendLog(">> RECON COMPLETE — " + summary);
+        } else {
+            m_reconProgressLabel->setText(">> RECON FAILED");
+            appendLog(">> RECON FAILED");
+        }
     });
 
     connect(&m_updater, &ZapUpdater::logMessage, this, &MainWindow::appendLog);
@@ -135,6 +147,14 @@ void MainWindow::setupUi() {
     reconActions->addWidget(m_feedZapBtn);
     reconActions->addWidget(m_pipelineBtn);
     reconLayout->addLayout(reconActions);
+
+    m_reconProgressLabel = new QLabel(">> RECON: idle");
+    m_reconProgressLabel->setObjectName("hint");
+    reconLayout->addWidget(m_reconProgressLabel);
+
+    m_reconSummaryLabel = new QLabel(">> RECON SUMMARY: —");
+    m_reconSummaryLabel->setObjectName("hint");
+    reconLayout->addWidget(m_reconSummaryLabel);
 
     auto* reconInfo = new QLabel(
         "Pipeline: subfinder → httpx → nmap → whatweb → gobuster → nuclei\n"
@@ -323,6 +343,22 @@ void MainWindow::onPollStatus() {
     });
 }
 
+void MainWindow::showReconSummary(const QString& summaryPath) {
+    const auto stats = ReconSummary::parse(summaryPath);
+    m_reconSummaryLabel->setText(ReconSummary::format(stats));
+}
+
+void MainWindow::launchRecon() {
+    const QString target = currentTarget();
+    m_reconBtn->setEnabled(false);
+    m_stopReconBtn->setEnabled(true);
+    m_feedZapBtn->setEnabled(false);
+    m_reconProgressLabel->setText(">> RECON: starting...");
+    m_reconSummaryLabel->setText(">> RECON SUMMARY: —");
+
+    m_recon.start(target, m_fastMode->isChecked(), m_skipNuclei->isChecked(), m_useProxy->isChecked());
+}
+
 void MainWindow::onStartRecon() {
     if (!m_authorized->isChecked()) {
         QMessageBox::warning(this, "Authorization required",
@@ -336,11 +372,23 @@ void MainWindow::onStartRecon() {
         return;
     }
 
-    m_reconBtn->setEnabled(false);
-    m_stopReconBtn->setEnabled(true);
-    m_feedZapBtn->setEnabled(false);
+    appendLog(">> Running preflight checks...");
+    m_preflight.check([this](const ReconPreflight::Result& result) {
+        if (!result.ok) {
+            QString details = result.error;
+            if (!result.missingTools.isEmpty()) {
+                details = "Missing: " + result.missingTools.join(", ");
+            }
+            appendLog(">> PREFLIGHT FAILED: " + details);
+            QMessageBox::warning(this, "Preflight failed",
+                                 "Recon prerequisites not met.\n\n" + details +
+                                     "\n\nSee docs/ZAP-INSTALL-LINUX.md and reconner/install-tools.sh");
+            return;
+        }
 
-    m_recon.start(target, m_fastMode->isChecked(), m_skipNuclei->isChecked(), m_useProxy->isChecked());
+        appendLog(">> Preflight OK — all tools available.");
+        launchRecon();
+    });
 }
 
 void MainWindow::onStopRecon() {
@@ -415,7 +463,19 @@ void MainWindow::onFullPipeline() {
     appendLog(">> FULL PIPELINE: ZAP BOOT → RECON → FEED → ACTIVE SCAN");
 
     auto startRecon = [this]() {
-        onStartRecon();
+        if (!m_authorized->isChecked()) return;
+        const QString target = currentTarget();
+        if (target.isEmpty() || target == "https://") return;
+
+        appendLog(">> Running preflight checks...");
+        m_preflight.check([this](const ReconPreflight::Result& result) {
+            if (!result.ok) {
+                appendLog(">> PREFLIGHT FAILED — cannot run full pipeline.");
+                return;
+            }
+            launchRecon();
+        });
+
         connect(&m_recon, &ReconRunner::finished, this,
                 [this](bool ok, const QString&) {
                     if (ok) onFeedZapFromRecon();

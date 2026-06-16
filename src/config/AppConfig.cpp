@@ -40,6 +40,16 @@ QString AppConfig::projectRoot() const {
     return m_projectRoot;
 }
 
+QString AppConfig::dataDir() const {
+    if (qEnvironmentVariableIsSet("ZAP_DESK_DATA")) {
+        return qEnvironmentVariable("ZAP_DESK_DATA");
+    }
+    const QString base =
+        QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/zap-desk";
+    QDir().mkpath(base);
+    return base;
+}
+
 QString AppConfig::reconnerDir() const {
     if (qEnvironmentVariableIsSet("RECONNER_DIR")) {
         return qEnvironmentVariable("RECONNER_DIR");
@@ -53,8 +63,8 @@ QString AppConfig::reconnerModule() const {
 
 QString AppConfig::resultsDir() const {
     const QString base = qEnvironmentVariableIsSet("ZAP_DESK_RESULTS")
-        ? qEnvironmentVariable("ZAP_DESK_RESULTS")
-        : QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/results";
+                             ? qEnvironmentVariable("ZAP_DESK_RESULTS")
+                             : dataDir() + "/results";
     QDir().mkpath(base);
     return base;
 }
@@ -65,14 +75,23 @@ QString AppConfig::zapLaunchScript() const {
     }
     const QString local = QDir(m_projectRoot).filePath("scripts/zap-launch.sh");
     if (QFileInfo::exists(local)) return local;
-    return "/data/dev/tools/config/zap/zap-launch.sh";
+    return QString();
 }
 
 QString AppConfig::zapHome() const {
     if (qEnvironmentVariableIsSet("ZAP_HOME")) {
         return qEnvironmentVariable("ZAP_HOME");
     }
-    return "/data/dev/tools/zap";
+    return QDir(dataDir()).filePath("zap");
+}
+
+QString AppConfig::zapConfigDir() const {
+    if (qEnvironmentVariableIsSet("ZAP_CONFIG_DIR")) {
+        return qEnvironmentVariable("ZAP_CONFIG_DIR");
+    }
+    const QString dir = QDir(dataDir()).filePath("config/home");
+    QDir().mkpath(dir);
+    return dir;
 }
 
 QString AppConfig::zapPidFile() const {
@@ -83,7 +102,7 @@ QString AppConfig::zapPidFile() const {
     if (!runtime.isEmpty()) {
         return QDir(runtime).filePath("zap-desk.pid");
     }
-    return QDir(m_projectRoot).filePath(".zap-desk.pid");
+    return QDir(dataDir()).filePath("zap-desk.pid");
 }
 
 QString AppConfig::zapApiUrl() const {

@@ -16,6 +16,8 @@ set(SOURCES
     src/core/ZapDaemon.cpp
     src/services/ReconRunner.cpp
     src/services/ReconBridge.cpp
+    src/services/ReconSummary.cpp
+    src/services/ReconPreflight.cpp
     src/services/ZapUpdater.cpp
     src/ui/MainWindow.cpp
 )

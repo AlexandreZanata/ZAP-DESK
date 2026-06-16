@@ -15,6 +15,7 @@ public:
     State state() const;
     QString lastOutputDir() const;
     QString lastSummaryPath() const;
+    QString currentPhase() const;
 
     void start(const QString& target, bool fastMode = false, bool skipNuclei = false,
                bool useZapProxy = true);
@@ -24,6 +25,7 @@ public slots:
 
 signals:
     void logLine(const QString& line);
+    void phaseChanged(int step, int total, const QString& phase, const QString& message);
     void stateChanged(ReconRunner::State state);
     void finished(bool success, const QString& summaryPath);
 
@@ -32,6 +34,8 @@ private:
     State m_state{State::Idle};
     QString m_lastOutputDir;
     QString m_lastSummaryPath;
+    QString m_currentPhase;
 
     void setState(State state);
+    void handleOutputLine(const QString& line);
 };

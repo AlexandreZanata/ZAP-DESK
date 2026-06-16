@@ -15,6 +15,7 @@ Pipeline
 """
 
 import logging
+import os
 import subprocess
 import threading
 import time
@@ -139,6 +140,11 @@ class ToolRunner:
         if not self.quiet:
             print(message, flush=True)
 
+    def _desk_phase(self, phase: str, step: int, total: int, message: str = "") -> None:
+        """Emit machine-readable progress for ZAP-DESK when ZAP_DESK_MODE=1."""
+        if os.environ.get("ZAP_DESK_MODE") == "1":
+            print(f"@@ZAP-DESK@@PHASE|{step}|{total}|{phase}|{message}", flush=True)
+
     # ------------------------------------------------------------------
     # Phase 1 — Subdomain discovery
     # ------------------------------------------------------------------
@@ -153,6 +159,7 @@ class ToolRunner:
             A deduplicated list of subdomain strings including *target* itself.
         """
         logger.info("Running subfinder for %s", target)
+        self._desk_phase("subfinder", 1, 6, f"Discovering subdomains for {target}")
 
         exists, path = check_tool_exists("subfinder")
         if not exists:
@@ -261,6 +268,7 @@ class ToolRunner:
             A list of normalized httpx result dicts.
         """
         logger.info("Running httpx for %d targets", len(targets))
+        self._desk_phase("httpx", 2, 6, f"Probing {len(targets)} targets")
 
         if self.progress:
             self.progress.show_tool_start(
@@ -434,6 +442,8 @@ class ToolRunner:
         max_hosts = 5 if self.fast_mode else 15
         hosts = hosts[:max_hosts]
 
+        self._desk_phase("nmap", 3, 6, f"Port scan on {len(hosts)} host(s)")
+
         if self.progress:
             self.progress.show_tool_start(
                 "nmap",
@@ -483,6 +493,7 @@ class ToolRunner:
             return []
 
         logger.info("Running whatweb for %d URLs", len(urls))
+        self._desk_phase("whatweb", 4, 6, f"Fingerprinting {len(urls)} URLs")
 
         if self.progress:
             self.progress.show_tool_start(
@@ -625,6 +636,7 @@ class ToolRunner:
         if not urls:
             return []
 
+        self._desk_phase("gobuster", 5, 6, f"Directory scan on {len(urls)} hosts")
         self._print(f"📁 [5/6] Running gobuster for {len(urls)} hosts...")
         wordlist = "common.txt" if self.fast_mode else "directory-list-2.3-medium.txt"
         all_results: List[Dict[str, Any]] = []
@@ -666,6 +678,7 @@ class ToolRunner:
             return []
 
         logger.info("Running nuclei for %d targets", len(targets))
+        self._desk_phase("nuclei", 6, 6, f"Template scan on {len(targets)} targets")
 
         if self.progress:
             self.progress.show_tool_start(
@@ -781,6 +794,7 @@ class ToolRunner:
         self.run_nuclei(live_urls)
 
         logger.info("Full scan completed")
+        self._desk_phase("complete", 6, 6, "Scan finished")
         self._print("\n" + "=" * 60)
         self._print("✅ Full Scan Completed!")
         self._print("=" * 60 + "\n")

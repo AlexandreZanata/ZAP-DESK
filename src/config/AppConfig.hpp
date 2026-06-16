@@ -7,11 +7,13 @@ public:
     static AppConfig& instance();
 
     QString projectRoot() const;
+    QString dataDir() const;
     QString reconnerDir() const;
     QString reconnerModule() const;
     QString resultsDir() const;
     QString zapLaunchScript() const;
     QString zapHome() const;
+    QString zapConfigDir() const;
     QString zapPidFile() const;
     QString zapApiUrl() const;
     int zapApiPort() const;

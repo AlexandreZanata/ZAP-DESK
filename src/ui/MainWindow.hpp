@@ -5,6 +5,8 @@
 
 #include "core/ZapClient.hpp"
 #include "core/ZapDaemon.hpp"
+#include "services/ReconPreflight.hpp"
+#include "services/ReconSummary.hpp"
 #include "services/ReconBridge.hpp"
 #include "services/ReconRunner.hpp"
 #include "services/ZapUpdater.hpp"
@@ -37,6 +39,8 @@ private slots:
     void onFeedZapFromRecon();
     void onCheckZapUpdate();
     void onFullPipeline();
+    void launchRecon();
+    void showReconSummary(const QString& summaryPath);
 
 private:
     ZapClient m_client;
@@ -44,6 +48,7 @@ private:
     ReconRunner m_recon;
     ReconBridge m_bridge;
     ZapUpdater m_updater;
+    ReconPreflight m_preflight;
     QTimer m_pollTimer;
 
     QTabWidget* m_tabs{};
@@ -64,6 +69,8 @@ private:
     QPushButton* m_feedZapBtn{};
     QPushButton* m_pipelineBtn{};
     QPushButton* m_updateZapBtn{};
+    QLabel* m_reconProgressLabel{};
+    QLabel* m_reconSummaryLabel{};
     QTableWidget* m_alertsTable{};
     QTextEdit* m_log{};
 
