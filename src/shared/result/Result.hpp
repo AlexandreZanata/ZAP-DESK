@@ -2,6 +2,7 @@
 
 #include "shared/errors/AppError.hpp"
 
+#include <optional>
 #include <utility>
 
 namespace shared {
@@ -12,7 +13,7 @@ public:
     static Result ok(T value) {
         Result r;
         r.m_ok = true;
-        r.m_value = std::move(value);
+        r.m_value.emplace(std::move(value));
         return r;
     }
 
@@ -24,16 +25,16 @@ public:
     }
 
     bool isOk() const { return m_ok; }
-    const T& value() const { return m_value; }
+    const T& value() const { return m_value.value(); }
     const E& error() const { return m_error; }
 
 private:
     bool m_ok{false};
-    T m_value{};
+    std::optional<T> m_value;
     E m_error{ErrorCode::Infrastructure, ""};
 };
 
-template <typename E = AppError>
+template <typename E>
 class Result<void, E> {
 public:
     static Result ok() {

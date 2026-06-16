@@ -1,0 +1,6 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/">
+        <file alias="icons/zap.svg">../packaging/icons/zap-desk.svg</file>
+    </qresource>
+</RCC>

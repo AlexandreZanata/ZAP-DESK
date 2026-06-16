@@ -1,9 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
-  <rect width="256" height="256" rx="24" fill="#0a0a0a"/>
-  <rect x="24" y="32" width="208" height="160" rx="8" stroke="#00ff41" stroke-width="6"/>
-  <text x="40" y="88" font-family="monospace" font-size="28" fill="#00ff41">&gt;_ ZAP</text>
-  <text x="40" y="128" font-family="monospace" font-size="22" fill="#00cccc">RECON</text>
-  <text x="40" y="168" font-family="monospace" font-size="18" fill="#ffb000">SCAN</text>
-  <rect x="24" y="208" width="208" height="16" fill="#004400"/>
-  <rect x="24" y="208" width="120" height="16" fill="#00ff41"/>
+  <rect width="256" height="256" rx="48" fill="#1565C0"/>
+  <circle cx="128" cy="128" r="96" fill="#1976D2"/>
+  <path fill="#FFC107" d="M148 48 L92 136 h44 l-20 72 72-100 h-44 z"/>
+  <text x="128" y="218" text-anchor="middle" font-family="Arial,sans-serif" font-size="28" font-weight="bold" fill="#FFFFFF">ZAP</text>
 </svg>

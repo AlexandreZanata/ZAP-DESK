@@ -1,5 +1,7 @@
 #pragma once
 
+#include "components/AppTheme.hpp"
+
 #include <QString>
 
 class AppConfig {
@@ -18,6 +20,10 @@ public:
     QString zapApiUrl() const;
     int zapApiPort() const;
     bool crtOverlayEnabled() const;
+    QString uiTheme() const;
+    components::AppThemeMode uiThemeMode() const;
+    void setUiTheme(const QString& theme);
+    QString appIconPath() const;
     QString zapApiKey() const;
     bool zapDevMode() const;
     int reconRateLimitSeconds() const;

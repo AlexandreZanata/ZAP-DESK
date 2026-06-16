@@ -22,15 +22,15 @@ shared::Result<ValidatedReconStart> StartReconUseCase::validate(const StartRecon
         return shared::Result<ValidatedReconStart>::fail(scan.error());
     }
 
-    ValidatedReconStart out;
-    out.scan = scan.value();
-    out.options = domain::ReconOptions{
-        target.value().value(),
-        request.fastMode,
-        request.skipNuclei,
-        request.useZapProxy,
-    };
-    return shared::Result<ValidatedReconStart>::ok(std::move(out));
+    return shared::Result<ValidatedReconStart>::ok(ValidatedReconStart{
+        scan.value(),
+        domain::ReconOptions{
+            target.value().value(),
+            request.fastMode,
+            request.skipNuclei,
+            request.useZapProxy,
+        },
+    });
 }
 
 }  // namespace application

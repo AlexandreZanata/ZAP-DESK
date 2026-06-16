@@ -32,7 +32,11 @@ void ZapUpdater::checkForUpdates(const QString& localVersion,
         }
 
         const QJsonObject release = QJsonDocument::fromJson(reply->readAll()).object();
-        info.latestVersion = release["tag_name"].toString().removePrefix("v");
+        QString latestTag = release["tag_name"].toString();
+        if (latestTag.startsWith(QLatin1Char('v'))) {
+            latestTag = latestTag.mid(1);
+        }
+        info.latestVersion = latestTag;
         info.releaseUrl = release["html_url"].toString();
 
         const QJsonArray assets = release["assets"].toArray();

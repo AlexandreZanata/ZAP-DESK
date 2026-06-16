@@ -4,6 +4,7 @@
 #include <QTimer>
 
 #include "presentation/ApplicationFacade.hpp"
+#include "components/AppTheme.hpp"
 
 class QCheckBox;
 class QLineEdit;
@@ -45,6 +46,7 @@ private slots:
     void onCheckZapUpdate();
     void onFullPipeline();
     void onOpenSettings();
+    void onCycleTheme();
 
 private:
     presentation::ApplicationFacade m_app;
@@ -74,12 +76,17 @@ private:
     QPushButton* m_feedZapBtn{};
     QPushButton* m_pipelineBtn{};
     QPushButton* m_updateZapBtn{};
+    QPushButton* m_themeBtn{};
 
     void appendLog(const QString& message);
     void setConnectedUi(bool connected);
     void setupUi();
     void applyStyle();
+    void applyTheme();
     void wireFacade();
     void applyCrtOverlaySetting();
+    void setThemeMode(components::AppThemeMode mode);
+    void updateThemeUi();
+    QString statusColor(const QString& role) const;
     QString currentTarget() const;
 };

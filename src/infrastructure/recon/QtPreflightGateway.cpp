@@ -1,5 +1,7 @@
 #include "QtPreflightGateway.hpp"
 
+namespace infrastructure {
+
 QtPreflightGateway::QtPreflightGateway(ReconPreflight* preflight, QObject* parent)
     : QObject(parent), m_preflight(preflight) {}
 
@@ -14,3 +16,5 @@ void QtPreflightGateway::check(std::function<void(domain::PreflightReport)> call
         callback(report);
     });
 }
+
+}  // namespace infrastructure

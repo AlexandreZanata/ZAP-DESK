@@ -1,0 +1,91 @@
+{
+  "meta": {
+    "author": "ZAP-DESK",
+    "name": "Hacker",
+    "version": "1.0.0"
+  },
+
+  "backgroundColorMain1": "#050805",
+  "backgroundColorMain2": "#0a100a",
+  "backgroundColorMain3": "#0d160d",
+  "backgroundColorMain4": "#122012",
+
+  "backgroundColorWorkspace": "#030503",
+  "backgroundColorTabBar": "#0a100a",
+
+  "borderColor": "#1a4d1a",
+  "borderColorHovered": "#2a6d2a",
+  "borderColorPressed": "#39ff14",
+  "borderColorDisabled": "#0d160d",
+
+  "focusColor": "#39ff1466",
+
+  "neutralColor": "#122012",
+  "neutralColorHovered": "#1a3020",
+  "neutralColorPressed": "#224028",
+  "neutralColorDisabled": "#0a100a",
+
+  "primaryColor": "#39ff14",
+  "primaryColorHovered": "#5aff3a",
+  "primaryColorPressed": "#2bcc10",
+  "primaryColorDisabled": "#1a4d1a",
+
+  "primaryAlternativeColor": "#00e5c0",
+  "primaryAlternativeColorHovered": "#1ae8c8",
+  "primaryAlternativeColorPressed": "#00ccb0",
+  "primaryAlternativeColorDisabled": "#0d3028",
+
+  "primaryColorForeground": "#050805",
+  "primaryColorForegroundHovered": "#050805",
+  "primaryColorForegroundPressed": "#050805",
+  "primaryColorForegroundDisabled": "#3a5a3a",
+
+  "secondaryColor": "#c8ffc8",
+  "secondaryColorHovered": "#d8ffd8",
+  "secondaryColorPressed": "#b8efb8",
+  "secondaryColorDisabled": "#3a5a3a",
+
+  "secondaryAlternativeColor": "#5a9a5a",
+  "secondaryAlternativeColorHovered": "#6aaa6a",
+  "secondaryAlternativeColorPressed": "#4a8a4a",
+  "secondaryAlternativeColorDisabled": "#2a4a2a",
+
+  "secondaryColorForeground": "#050805",
+  "secondaryColorForegroundHovered": "#050805",
+  "secondaryColorForegroundPressed": "#050805",
+  "secondaryColorForegroundDisabled": "#2a4a2a",
+
+  "semiTransparentColor1": "#39ff140a",
+  "semiTransparentColor2": "#39ff1419",
+  "semiTransparentColor3": "#39ff1421",
+  "semiTransparentColor4": "#39ff1428",
+
+  "shadowColor1": "#00000040",
+  "shadowColor2": "#00000060",
+  "shadowColor3": "#00000080",
+
+  "statusColorForeground": "#050805",
+  "statusColorForegroundHovered": "#050805",
+  "statusColorForegroundPressed": "#050805",
+  "statusColorForegroundDisabled": "#3a5a3a",
+
+  "statusColorError": "#ff4444",
+  "statusColorErrorHovered": "#ff6666",
+  "statusColorErrorPressed": "#ff2222",
+  "statusColorErrorDisabled": "#4a2020",
+
+  "statusColorInfo": "#00e5c0",
+  "statusColorInfoHovered": "#1ae8c8",
+  "statusColorInfoPressed": "#00ccb0",
+  "statusColorInfoDisabled": "#0d3028",
+
+  "statusColorSuccess": "#39ff14",
+  "statusColorSuccessHovered": "#5aff3a",
+  "statusColorSuccessPressed": "#2bcc10",
+  "statusColorSuccessDisabled": "#1a4d1a",
+
+  "statusColorWarning": "#ffb000",
+  "statusColorWarningHovered": "#ffc020",
+  "statusColorWarningPressed": "#e6a000",
+  "statusColorWarningDisabled": "#4a4020"
+}

@@ -14,7 +14,8 @@ ZapDaemon::ZapDaemon(QObject* parent) : QObject(parent) {
 
     connect(&m_process, &QProcess::started, this, [this]() {
         writePid(m_process.processId());
-        emit logMessage(QString("ZAP started in daemon mode (port %1)").arg(port));
+        emit logMessage(QString("ZAP started in daemon mode (port %1)")
+                            .arg(AppConfig::instance().zapApiPort()));
         emit stateChanged(true);
     });
 

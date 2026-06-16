@@ -35,7 +35,7 @@ Portable sandboxed install via Flathub-compatible manifest.
 ```bash
 sudo apt install flatpak flatpak-builder
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-flatpak install flathub org.kde.Platform//6.7 org.kde.Sdk//6.7
+flatpak install flathub org.kde.Platform//6.10 org.kde.Sdk//6.10
 ```
 
 ### Build

@@ -2,8 +2,7 @@
 
 #include <QWidget>
 
-class QLabel;
-class QTextEdit;
+class QPlainTextEdit;
 
 namespace components {
 
@@ -16,8 +15,7 @@ public:
     void append(const QString& message);
 
 private:
-    QLabel* m_title{};
-    QTextEdit* m_log{};
+    QPlainTextEdit* m_log{};
 };
 
 }  // namespace components

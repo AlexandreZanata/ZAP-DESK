@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.21)
 project(ZAP-DESK VERSION 0.8.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -9,6 +9,7 @@ set(CMAKE_AUTOUIC ON)
 
 option(ZAP_DESK_ENABLE_COVERAGE "Enable GCC coverage flags for tests" OFF)
 option(ZAP_DESK_ENABLE_INTEGRATION_TESTS "Build optional ZAP integration tests" OFF)
+option(ZAP_DESK_BUILD_TESTS "Build GoogleTest unit tests" ON)
 
 if(ZAP_DESK_ENABLE_COVERAGE)
     add_compile_options(--coverage -fprofile-arcs -ftest-coverage)
@@ -16,6 +17,9 @@ if(ZAP_DESK_ENABLE_COVERAGE)
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets Network)
+
+find_package(KF6ColorScheme REQUIRED)
+find_package(KF6Config REQUIRED)
 
 set(DOMAIN_SOURCES
     src/shared/errors/AppError.cpp
@@ -32,6 +36,9 @@ set(DOMAIN_SOURCES
 )
 
 set(COMPONENT_SOURCES
+    src/components/AppTheme.cpp
+    src/components/KdeTheme.cpp
+    src/components/UiKit.cpp
     src/components/HackerTheme.cpp
     src/components/LogConsole.cpp
     src/components/ScanProgressBar.cpp
@@ -52,6 +59,7 @@ set(SECURITY_SOURCES
 
 set(APP_SOURCES
     src/main.cpp
+    resources/app.qrc
     src/config/AppConfig.cpp
     src/core/ZapClient.cpp
     src/core/ZapDaemon.cpp
@@ -77,11 +85,15 @@ target_include_directories(zap-desk PRIVATE
 target_link_libraries(zap-desk PRIVATE
     Qt6::Widgets
     Qt6::Network
+    KF6::ColorScheme
+    KF6::ConfigCore
 )
 
 # ---------------------------------------------------------------------------
 # GoogleTest unit tests
 # ---------------------------------------------------------------------------
+
+if(ZAP_DESK_BUILD_TESTS)
 
 include(FetchContent)
 set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
@@ -152,6 +164,8 @@ if(ZAP_DESK_ENABLE_INTEGRATION_TESTS)
     gtest_discover_tests(zap-desk-integration-tests)
 endif()
 
+endif()  # ZAP_DESK_BUILD_TESTS
+
 install(TARGETS zap-desk RUNTIME DESTINATION bin)
 
 install(FILES packaging/zap-desk.desktop DESTINATION share/applications)
@@ -184,7 +198,7 @@ set(CPACK_PACKAGE_CONTACT "https://github.com/AlexandreZanata/ZAP-DESK")
 set(CPACK_GENERATOR "DEB")
 set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS
-    "libqt6widgets6 (>= 6.2), libqt6network6 (>= 6.2), python3, python3-pip, curl"
+    "libqt6widgets6 (>= 6.2), libqt6network6 (>= 6.2), libkf6colorscheme6, libkf6configcore6, python3, python3-pip, curl"
 )
 set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "nmap, chromium-browser | chromium")
 set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA

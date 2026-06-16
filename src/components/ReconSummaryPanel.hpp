@@ -16,8 +16,10 @@ public:
     void clear();
 
 private:
-    QLabel* m_title{};
+    void updateFooter();
+
     QLabel* m_summary{};
+    QLabel* m_footer{};
 };
 
 }  // namespace components

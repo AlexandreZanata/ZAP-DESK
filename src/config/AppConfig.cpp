@@ -1,9 +1,11 @@
 #include "AppConfig.hpp"
 
+#include "components/AppTheme.hpp"
 #include "security/CredentialStore.hpp"
 
 #include <QCoreApplication>
 #include <QDir>
+#include <QFileInfo>
 #include <QFileInfo>
 #include <QSettings>
 #include <QStandardPaths>
@@ -149,8 +151,40 @@ int AppConfig::zapApiPort() const {
 }
 
 bool AppConfig::crtOverlayEnabled() const {
+    if (!components::AppTheme::supportsCrtOverlay(uiThemeMode())) return false;
     QSettings settings;
     return settings.value("ui/crtOverlay", true).toBool();
+}
+
+QString AppConfig::uiTheme() const {
+    QSettings settings;
+    return settings.value("ui/theme", "hacker").toString();
+}
+
+components::AppThemeMode AppConfig::uiThemeMode() const {
+    return components::AppTheme::fromString(uiTheme());
+}
+
+void AppConfig::setUiTheme(const QString& theme) {
+    QSettings settings;
+    settings.setValue("ui/theme", theme);
+    settings.sync();
+}
+
+QString AppConfig::appIconPath() const {
+    const QString bundled = QDir(m_projectRoot).filePath("packaging/icons/zap-desk.svg");
+    if (QFileInfo::exists(bundled)) return bundled;
+
+    const QString appDir = QCoreApplication::applicationDirPath();
+    QDir prefixDir(appDir);
+    if (prefixDir.cdUp()) {
+        const QString installed =
+            prefixDir.filePath("share/icons/hicolor/scalable/apps/com.zapdesk.ZAPDesk.svg");
+        if (QFileInfo::exists(installed)) return installed;
+        const QString legacy = prefixDir.filePath("share/icons/hicolor/scalable/apps/zap-desk.svg");
+        if (QFileInfo::exists(legacy)) return legacy;
+    }
+    return {};
 }
 
 QString AppConfig::zapApiKey() const {

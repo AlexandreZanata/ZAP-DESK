@@ -3,6 +3,7 @@
 #include <QDialog>
 
 class QCheckBox;
+class QComboBox;
 class QLineEdit;
 class QSpinBox;
 
@@ -26,6 +27,7 @@ private:
     QCheckBox* m_zapDevMode{};
     QCheckBox* m_useKeyring{};
     QSpinBox* m_reconRateLimit{};
+    QComboBox* m_theme{};
     QCheckBox* m_crtOverlay{};
 };
 

@@ -1,5 +1,7 @@
 #include "QtReconGateway.hpp"
 
+namespace infrastructure {
+
 QtReconGateway::QtReconGateway(ReconRunner* runner, QObject* parent)
     : QObject(parent), m_runner(runner) {}
 
@@ -15,3 +17,5 @@ void QtReconGateway::stop() {
 std::string QtReconGateway::lastSummaryPath() const {
     return m_runner->lastSummaryPath().toStdString();
 }
+
+}  // namespace infrastructure

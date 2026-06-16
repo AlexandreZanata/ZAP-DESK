@@ -33,3 +33,6 @@ reconner/test-results/
 # OS
 .DS_Store
 *~
+
+# Flatpak local build cache
+.flatpak-builder/

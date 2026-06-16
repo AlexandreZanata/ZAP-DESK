@@ -13,8 +13,19 @@ if ! command -v flatpak-builder >/dev/null 2>&1; then
   exit 1
 fi
 
-echo ">> Installing KDE Flatpak runtime (if needed)..."
-flatpak install -y flathub org.kde.Platform//6.7 org.kde.Sdk//6.7 2>/dev/null || true
+if ! flatpak remote-list | grep -q flathub; then
+  echo ">> Adding flathub remote..."
+  flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+fi
+
+KDE_RUNTIME_VERSION="${KDE_RUNTIME_VERSION:-}"
+if [ -z "$KDE_RUNTIME_VERSION" ]; then
+  KDE_RUNTIME_VERSION=$(grep 'runtime-version:' "$MANIFEST" | sed -E 's/.*"([^"]+)".*/\1/')
+fi
+
+echo ">> Installing KDE Flatpak runtime ${KDE_RUNTIME_VERSION} (if needed)..."
+flatpak install -y flathub "org.kde.Platform//${KDE_RUNTIME_VERSION}" "org.kde.Sdk//${KDE_RUNTIME_VERSION}" \
+  2>/dev/null || flatpak install -y flathub org.kde.Platform//"${KDE_RUNTIME_VERSION}" org.kde.Sdk//"${KDE_RUNTIME_VERSION}"
 
 mkdir -p "$BUILD_DIR"
 flatpak-builder --force-clean --repo="$REPO_DIR" "$BUILD_DIR/build" "$MANIFEST"
@@ -22,5 +33,6 @@ flatpak build-bundle "$REPO_DIR" "$BUNDLE" com.zapdesk.ZAPDesk
 
 echo ""
 echo ">> Flatpak bundle: $BUNDLE"
-echo ">> Install: flatpak install --user \"$BUNDLE\""
-echo ">> Run:     flatpak run com.zapdesk.ZAPDesk"
+echo ">> First install:  flatpak install --user \"$BUNDLE\""
+echo ">> Update/reinstall: flatpak install --user --reinstall \"$BUNDLE\""
+echo ">> Run:              flatpak run com.zapdesk.ZAPDesk"

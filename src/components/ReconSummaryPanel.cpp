@@ -1,22 +1,38 @@
 #include "ReconSummaryPanel.hpp"
 
+#include "UiKit.hpp"
+#include "config/AppConfig.hpp"
+
 #include <QLabel>
 #include <QVBoxLayout>
 
 namespace components {
 
 ReconSummaryPanel::ReconSummaryPanel(QWidget* parent) : QWidget(parent) {
-    auto* layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
+    auto* outer = new QVBoxLayout(this);
+    outer->setContentsMargins(0, 0, 0, 0);
 
-    m_title = new QLabel(">> RECON SUMMARY");
-    m_title->setObjectName("hint");
-    m_summary = new QLabel(">> RECON SUMMARY: —");
+    auto section = UiKit::createSection(
+        "Recon Summary", "Pipeline output and artifact paths.", this);
+    m_summary = new QLabel("No recon results yet.", section.frame);
     m_summary->setObjectName("hint");
     m_summary->setWordWrap(true);
+    m_summary->setMinimumHeight(UiKit::kSummaryMinHeight);
+    section.layout->addWidget(m_summary, 1);
 
-    layout->addWidget(m_title);
-    layout->addWidget(m_summary);
+    m_footer = new QLabel(section.frame);
+    m_footer->setObjectName("hint");
+    m_footer->setWordWrap(true);
+    updateFooter();
+    section.layout->addWidget(m_footer);
+
+    outer->addWidget(section.frame);
+}
+
+void ReconSummaryPanel::updateFooter() {
+    m_footer->setText(QStringLiteral("Pipeline: subfinder → httpx → nmap → whatweb → gobuster → nuclei\n"
+                                      "Results: %1")
+                          .arg(AppConfig::instance().resultsDir()));
 }
 
 void ReconSummaryPanel::setSummaryText(const QString& text) {
@@ -24,7 +40,7 @@ void ReconSummaryPanel::setSummaryText(const QString& text) {
 }
 
 void ReconSummaryPanel::clear() {
-    m_summary->setText(">> RECON SUMMARY: —");
+    m_summary->setText("No recon results yet.");
 }
 
 }  // namespace components
