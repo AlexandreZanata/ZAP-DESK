@@ -75,3 +75,11 @@ jobs:
 
       - name: Run Phase 7 packaging validation
         run: ./scripts/validate-phase7.sh
+
+  validate-phase8:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Phase 8 distribution validation
+        run: ./scripts/validate-phase8.sh

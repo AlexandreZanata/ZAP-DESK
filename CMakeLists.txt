@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(ZAP-DESK VERSION 0.7.0 LANGUAGES CXX)
+project(ZAP-DESK VERSION 0.8.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -47,6 +47,7 @@ set(SECURITY_SOURCES
     src/security/CredentialStore.cpp
     src/security/AuditLogger.cpp
     src/security/ReconRateLimiter.cpp
+    src/security/KeyringBackend.cpp
 )
 
 set(APP_SOURCES
@@ -104,6 +105,7 @@ set(UNIT_TEST_SOURCES
     tests/unit/test_zap_client_auth.cpp
     tests/unit/test_recon_rate_limiter.cpp
     tests/unit/test_audit_logger.cpp
+    tests/unit/test_credential_store.cpp
 )
 
 add_executable(zap-desk-unit-tests

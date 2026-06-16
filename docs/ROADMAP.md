@@ -2,7 +2,7 @@
 
 Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 
-**Current phase: complete** — all roadmap phases delivered (v0.7.0).
+**Current phase: Phase 8 complete** — v0.8.0 (keyring + Flatpak).
 
 ---
 
@@ -18,6 +18,7 @@ Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 | 5 | UI Components | ✅ Done | Reusable widgets, unified findings view |
 | 6 | Security Hardening | ✅ Done | API key support, secure defaults |
 | 7 | Packaging & Release | ✅ Done | AppImage/deb, installer, release workflow |
+| 8 | Distribution & Secrets | ✅ Done | Keyring storage, Flatpak bundle |
 
 ---
 
@@ -148,9 +149,23 @@ Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 
 ---
 
+## Phase 8 — Distribution & Secrets ✅
+
+**Delivered:**
+- `KeyringBackend` — libsecret via `secret-tool` (GNOME Keyring / KWallet)
+- `CredentialStore` — keyring + QSettings with auto-migration
+- Settings UI: **Store API key in system keyring**
+- Flatpak manifest `packaging/flatpak/com.zapdesk.ZAPDesk.yml`
+- `make package-flatpak`, `make validate-phase8`
+- [Phase 8 distribution guide](PHASE8-DISTRIBUTION.md)
+
+**Exit criteria:** API key storable outside plaintext config; Flatpak build documented. ✅
+
+---
+
 ## Roadmap complete
 
-All planned phases (0–7) are delivered. Future work: keyring integration, full AppImage with bundled Qt, Flatpak.
+Phases 0–8 delivered. Future work: bundled Qt AppImage, Flathub publish, operator E2E sign-off.
 
 ---
 
@@ -162,5 +177,6 @@ All planned phases (0–7) are delivered. Future work: keyring integration, full
 - [Phase 5 UI](PHASE5-UI.md)
 - [Phase 6 Security](PHASE6-SECURITY.md)
 - [Phase 7 Packaging](PHASE7-PACKAGING.md)
+- [Phase 8 Distribution](PHASE8-DISTRIBUTION.md)
 - [Subdomain discovery](SUBDOMAIN-DISCOVERY.md)
 - [Stack](STACK.md)

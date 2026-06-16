@@ -11,6 +11,9 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
   python3-pip \
   curl
 
+# Optional: secure API key storage in system keyring
+# sudo apt install libsecret-tools
+
 echo "Dependencies installed."
 echo "  make install-reconner  # install reconner"
 echo "  make build             # build zap-desk"

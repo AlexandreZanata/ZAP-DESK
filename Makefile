@@ -1,4 +1,4 @@
-.PHONY: dev build test test-unit test-reconner test-integration test-domain validate-phase2 validate-phase4 validate-phase7 lint install-deps install-reconner install-all package-deb package-appimage update-zap clean
+.PHONY: dev build test test-unit test-reconner test-integration test-domain validate-phase2 validate-phase4 validate-phase7 validate-phase8 lint install-deps install-reconner install-all package-deb package-appimage package-flatpak update-zap clean
 
 BUILD_DIR := build
 CMAKE_FLAGS := -DCMAKE_BUILD_TYPE=Release
@@ -59,6 +59,14 @@ validate-phase4:
 validate-phase7:
 	chmod +x scripts/validate-phase7.sh
 	./scripts/validate-phase7.sh
+
+validate-phase8:
+	chmod +x scripts/validate-phase8.sh
+	./scripts/validate-phase8.sh
+
+package-flatpak:
+	chmod +x scripts/package-flatpak.sh
+	./scripts/package-flatpak.sh
 
 clean:
 	rm -rf $(BUILD_DIR)

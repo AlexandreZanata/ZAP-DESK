@@ -43,11 +43,13 @@ SettingsDialog::SettingsDialog(QWidget* parent) : QDialog(parent) {
     m_zapApiKey->setPlaceholderText("Leave empty to use ZAP_API_KEY env or dev mode");
 
     m_zapDevMode = new QCheckBox("Dev mode: disable ZAP API key check (localhost only)");
+    m_useKeyring = new QCheckBox("Store API key in system keyring (libsecret)");
     m_reconRateLimit = new QSpinBox;
     m_reconRateLimit->setRange(0, 3600);
     m_reconRateLimit->setSuffix(" s");
 
     securityForm->addRow("ZAP API key:", m_zapApiKey);
+    securityForm->addRow(m_useKeyring);
     securityForm->addRow(m_zapDevMode);
     securityForm->addRow("Recon rate limit:", m_reconRateLimit);
 
@@ -81,6 +83,11 @@ void SettingsDialog::loadFromConfig() {
     m_resultsDir->setText(settings.value("paths/results", cfg.resultsDir()).toString());
     m_reconnerDir->setText(settings.value("paths/reconner", cfg.reconnerDir()).toString());
     m_zapApiKey->setText(security::CredentialStore::zapApiKey());
+    m_useKeyring->setChecked(security::CredentialStore::useKeyring());
+    m_useKeyring->setEnabled(security::CredentialStore::keyringAvailable());
+    if (!security::CredentialStore::keyringAvailable()) {
+        m_useKeyring->setToolTip("Install libsecret-tools (secret-tool) to enable keyring storage.");
+    }
     m_zapDevMode->setChecked(settings.value("security/devMode", false).toBool());
     m_reconRateLimit->setValue(settings.value("security/reconRateLimit", 30).toInt());
     m_crtOverlay->setChecked(settings.value("ui/crtOverlay", true).toBool());
@@ -97,6 +104,7 @@ void SettingsDialog::saveToConfig() {
     settings.setValue("ui/crtOverlay", m_crtOverlay->isChecked());
     settings.sync();
 
+    security::CredentialStore::setUseKeyring(m_useKeyring->isChecked());
     security::CredentialStore::setZapApiKey(m_zapApiKey->text().trimmed());
     AppConfig::instance().reload();
 }

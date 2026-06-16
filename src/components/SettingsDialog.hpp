@@ -24,6 +24,7 @@ private:
     QLineEdit* m_reconnerDir{};
     QLineEdit* m_zapApiKey{};
     QCheckBox* m_zapDevMode{};
+    QCheckBox* m_useKeyring{};
     QSpinBox* m_reconRateLimit{};
     QCheckBox* m_crtOverlay{};
 };

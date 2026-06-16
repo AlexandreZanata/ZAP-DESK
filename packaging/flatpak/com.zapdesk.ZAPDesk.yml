@@ -1,0 +1,25 @@
+app-id: com.zapdesk.ZAPDesk
+runtime: org.kde.Platform
+runtime-version: "6.7"
+sdk: org.kde.Sdk
+command: zap-desk
+finish-args:
+  - --share=network
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --filesystem=home
+  - --talk-name=org.freedesktop.secrets
+  - --device=dri
+
+modules:
+  - name: zap-desk
+    buildsystem: cmake
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+    sources:
+      - type: dir
+        path: ../..
+    post-install:
+      - install -Dm644 packaging/zap-desk.desktop /app/share/applications/com.zapdesk.ZAPDesk.desktop
+      - install -Dm644 packaging/icons/zap-desk.svg /app/share/icons/hicolor/scalable/apps/com.zapdesk.ZAPDesk.svg
+      - desktop-file-edit --set-key=Icon --set-value=com.zapdesk.ZAPDesk /app/share/applications/com.zapdesk.ZAPDesk.desktop

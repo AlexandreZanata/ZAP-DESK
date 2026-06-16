@@ -6,7 +6,7 @@ Unifies **OWASP ZAP** (spider, active scan, alerts) with **Reconner** (automated
 
 ```
 ╔══════════════════════════════════════════════════════════╗
-║  ZAP-DESK // RECONNER — SECURITY TERMINAL v0.7.0         ║
+║  ZAP-DESK // RECONNER — SECURITY TERMINAL v0.8.0         ║
 ║  [ OWASP ZAP + RECON PIPELINE ]  :: LINUX EDITION ::    ║
 ╚══════════════════════════════════════════════════════════╝
 ```
@@ -21,6 +21,8 @@ Unifies **OWASP ZAP** (spider, active scan, alerts) with **Reconner** (automated
 - Unified findings view (ZAP + nuclei)
 - API key support, audit log, recon rate limiting
 - `.deb` package and desktop entry for Ubuntu/Pop!_OS
+- System keyring storage for ZAP API key (libsecret)
+- Flatpak bundle support
 - Phosphorescent green CRT theme (90s)
 
 ## Requirements
@@ -90,6 +92,7 @@ ZAP-DESK/
 - [Install and configure OWASP ZAP on Linux](docs/ZAP-INSTALL-LINUX.md)
 - [Subdomain discovery guide](docs/SUBDOMAIN-DISCOVERY.md)
 - [Packaging & release](docs/PHASE7-PACKAGING.md)
+- [Distribution & secrets (keyring, Flatpak)](docs/PHASE8-DISTRIBUTION.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Stack](docs/STACK.md)
 - [ZAP + Reconner integration](docs/INTEGRATION.md)
