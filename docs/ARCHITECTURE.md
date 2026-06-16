@@ -59,18 +59,19 @@ ZAP-DESK/
 │   ├── core/
 │   │   ├── ZapClient.*         # ZAP REST client
 │   │   └── ZapDaemon.*         # ZAP lifecycle
-│   ├── domain/                 # Pure entities (future)
-│   ├── application/            # Use cases (future)
-│   ├── infrastructure/         # Adapters (future)
+│   ├── domain/                 # Entities, value objects, ports
+│   ├── application/            # Use cases
+│   ├── infrastructure/         # Qt gateways, JSON readers
+│   ├── presentation/           # ApplicationFacade
 │   ├── services/
 │   │   ├── ReconRunner.*       # Orchestrates reconner via QProcess
-│   │   ├── ReconBridge.*       # summary.json → ZAP
+│   │   ├── ReconBridge.*       # Legacy (superseded by facade)
 │   │   └── ZapUpdater.*        # ZAP auto-update
 │   ├── ui/
-│   │   └── MainWindow.*        # 90s hacker interface
-│   ├── components/             # Reusable widgets (future)
+│   │   └── MainWindow.*        # Thin controller
+│   ├── components/             # LogConsole, FindingsTable, SettingsDialog, etc.
 │   └── main.cpp
-├── tests/                      # C++ tests (future)
+├── tests/                      # GoogleTest unit + optional integration
 ├── CMakeLists.txt
 ├── Makefile
 └── README.md

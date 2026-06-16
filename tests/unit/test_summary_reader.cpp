@@ -31,4 +31,15 @@ TEST(JsonReconSummaryReaderTest, ReturnsEmptyForMissingFile) {
     const auto stats = reader.load("/nonexistent/summary.json");
     EXPECT_FALSE(stats.valid);
     EXPECT_TRUE(reader.loadUrls("/nonexistent/summary.json").empty());
+    EXPECT_TRUE(reader.loadNucleiFindings("/nonexistent/summary.json").empty());
+}
+
+TEST(JsonReconSummaryReaderTest, LoadsNucleiFindingsFromFixture) {
+    infrastructure::JsonReconSummaryReader reader;
+    const auto findings = reader.loadNucleiFindings(testutil::summaryFixturePath());
+
+    ASSERT_EQ(findings.size(), 1u);
+    EXPECT_EQ(findings[0].templateId, "test");
+    EXPECT_EQ(findings[0].severity, "info");
+    EXPECT_EQ(findings[0].url, "https://example.com");
 }

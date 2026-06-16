@@ -68,4 +68,33 @@ std::vector<std::string> JsonReconSummaryReader::loadUrls(const std::string& sum
     return urls;
 }
 
+std::vector<NucleiFinding> JsonReconSummaryReader::loadNucleiFindings(
+    const std::string& summaryPath) const {
+    std::vector<NucleiFinding> findings;
+
+    QFile file(QString::fromStdString(summaryPath));
+    if (!file.open(QIODevice::ReadOnly)) return findings;
+
+    const QJsonObject root = QJsonDocument::fromJson(file.readAll()).object();
+    const QJsonArray nuclei = root.value("nuclei_results").toArray();
+    findings.reserve(nuclei.size());
+
+    for (const QJsonValue& value : nuclei) {
+        const QJsonObject item = value.toObject();
+        NucleiFinding finding;
+        finding.templateId = item.value("template").toString().toStdString();
+        finding.severity = item.value("severity").toString("unknown").toStdString();
+        finding.url = item.value("url").toString().toStdString();
+        finding.description = item.value("matcher-name").toString().toStdString();
+        if (finding.description.empty()) {
+            finding.description = finding.templateId;
+        }
+        if (!finding.url.empty()) {
+            findings.push_back(std::move(finding));
+        }
+    }
+
+    return findings;
+}
+
 }  // namespace infrastructure

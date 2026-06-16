@@ -17,6 +17,7 @@ public:
     QString zapPidFile() const;
     QString zapApiUrl() const;
     int zapApiPort() const;
+    bool crtOverlayEnabled() const;
 
     void reload();
 

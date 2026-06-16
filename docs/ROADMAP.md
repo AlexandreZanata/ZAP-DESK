@@ -2,7 +2,7 @@
 
 Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 
-**Current phase: Phase 5 (UI Components)** — Testing & CI complete.
+**Current phase: Phase 6 (Security Hardening)** — UI Components complete.
 
 ---
 
@@ -15,8 +15,8 @@ Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 | 2 | Integration Layer | ✅ Done | ReconRunner, ReconBridge, ZapUpdater, Full Pipeline |
 | 3 | Domain & Architecture | ✅ Done | Clean architecture, Result type, use cases, facade |
 | 4 | Testing & CI | ✅ Done | GoogleTest, pytest coverage, CI pipeline |
-| 5 | UI Components | 🔄 Current | Reusable widgets, unified findings view |
-| 6 | Security Hardening | ⏳ Pending | API key support, secure defaults |
+| 5 | UI Components | ✅ Done | Reusable widgets, unified findings view |
+| 6 | Security Hardening | 🔄 Current | API key support, secure defaults |
 | 7 | Packaging & Release | ⏳ Pending | AppImage/deb, installer, auto-update polish |
 
 ---
@@ -102,20 +102,21 @@ Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 
 ---
 
-## Phase 5 — UI Components 🔄 (CURRENT)
+## Phase 5 — UI Components ✅
 
-**Planned:**
-- `src/components/` — `AlertTable`, `LogConsole`, `ScanProgressBar`, `ReconSummaryPanel`
-- Unified findings view (ZAP alerts + nuclei results from `summary.json`)
-- Settings dialog (ZAP path, port, proxy, results dir)
+**Delivered:**
+- `src/components/` — `LogConsole`, `FindingsTable`, `ScanProgressBar`, `ReconSummaryPanel`, `StatusBanner`, `ScanHistorySidebar`, `SettingsDialog`, `CrtOverlay`, `HackerTheme`
+- Unified findings view (ZAP alerts + nuclei from `summary.json`)
+- Settings dialog (ZAP home, API port, results/reconner paths, CRT toggle)
 - Scan history sidebar
-- Optional: scanline CRT overlay effect
+- CRT scanline overlay (optional)
+- [Phase 5 UI guide](PHASE5-UI.md)
 
-**Exit criteria:** Modular UI; operator can review all findings in one place.
+**Exit criteria:** Modular UI; operator can review all findings in one place. ✅
 
 ---
 
-## Phase 6 — Security Hardening ⏳
+## Phase 6 — Security Hardening 🔄 (CURRENT)
 
 **Planned:**
 - ZAP API key support in `ZapClient` and settings UI
@@ -141,15 +142,14 @@ Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 
 ---
 
-## What to work on next (Phase 5 backlog)
+## What to work on next (Phase 6 backlog)
 
 Priority order:
 
-1. Extract `LogConsole` widget from `MainWindow`
-2. Extract `AlertTable` component
-3. `ReconSummaryPanel` for post-scan stats
-4. Unified findings view (ZAP + nuclei)
-5. Settings dialog (paths, port, proxy)
+1. ZAP API key support in `ZapClient` and settings UI
+2. Remove `api.disablekey=true` from production profile
+3. Secure credential storage (optional keyring)
+4. Audit log for scan actions
 
 ---
 
@@ -158,4 +158,5 @@ Priority order:
 - [Architecture](ARCHITECTURE.md)
 - [ZAP Install (Linux)](ZAP-INSTALL-LINUX.md)
 - [Integration](INTEGRATION.md)
+- [Phase 5 UI](PHASE5-UI.md)
 - [Stack](STACK.md)

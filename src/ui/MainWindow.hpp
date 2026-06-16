@@ -8,10 +8,19 @@
 class QCheckBox;
 class QLineEdit;
 class QPushButton;
-class QLabel;
-class QTableWidget;
-class QTextEdit;
+class QResizeEvent;
 class QTabWidget;
+
+namespace components {
+class CrtOverlay;
+class FindingsTable;
+class LogConsole;
+class ReconSummaryPanel;
+class ScanHistorySidebar;
+class ScanProgressBar;
+class SettingsDialog;
+class StatusBanner;
+}  // namespace components
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -19,27 +28,37 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow(QWidget* parent = nullptr);
 
+protected:
+    void resizeEvent(QResizeEvent* event) override;
+
 private slots:
     void onStartZap();
     void onStopZap();
     void onAjaxScan();
     void onActiveScan();
     void onStopScans();
-    void onRefreshAlerts();
+    void onRefreshFindings();
     void onPollStatus();
     void onStartRecon();
     void onStopRecon();
     void onFeedZapFromRecon();
     void onCheckZapUpdate();
     void onFullPipeline();
+    void onOpenSettings();
 
 private:
     presentation::ApplicationFacade m_app;
     QTimer m_pollTimer;
 
+    components::StatusBanner* m_statusBanner{};
+    components::ScanHistorySidebar* m_history{};
+    components::FindingsTable* m_findings{};
+    components::LogConsole* m_logConsole{};
+    components::ScanProgressBar* m_reconProgress{};
+    components::ReconSummaryPanel* m_reconSummary{};
+    components::CrtOverlay* m_crtOverlay{};
+
     QTabWidget* m_tabs{};
-    QLabel* m_statusLabel{};
-    QLabel* m_asciiBanner{};
     QLineEdit* m_urlInput{};
     QCheckBox* m_fastMode{};
     QCheckBox* m_skipNuclei{};
@@ -55,15 +74,12 @@ private:
     QPushButton* m_feedZapBtn{};
     QPushButton* m_pipelineBtn{};
     QPushButton* m_updateZapBtn{};
-    QLabel* m_reconProgressLabel{};
-    QLabel* m_reconSummaryLabel{};
-    QTableWidget* m_alertsTable{};
-    QTextEdit* m_log{};
 
     void appendLog(const QString& message);
     void setConnectedUi(bool connected);
     void setupUi();
     void applyStyle();
     void wireFacade();
+    void applyCrtOverlaySetting();
     QString currentTarget() const;
 };

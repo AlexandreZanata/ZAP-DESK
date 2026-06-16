@@ -3,6 +3,7 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
+#include <QSettings>
 #include <QStandardPaths>
 
 AppConfig& AppConfig::instance() {
@@ -54,6 +55,10 @@ QString AppConfig::reconnerDir() const {
     if (qEnvironmentVariableIsSet("RECONNER_DIR")) {
         return qEnvironmentVariable("RECONNER_DIR");
     }
+    QSettings settings;
+    if (settings.contains("paths/reconner")) {
+        return settings.value("paths/reconner").toString();
+    }
     return QDir(m_projectRoot).filePath("reconner");
 }
 
@@ -62,9 +67,18 @@ QString AppConfig::reconnerModule() const {
 }
 
 QString AppConfig::resultsDir() const {
-    const QString base = qEnvironmentVariableIsSet("ZAP_DESK_RESULTS")
-                             ? qEnvironmentVariable("ZAP_DESK_RESULTS")
-                             : dataDir() + "/results";
+    if (qEnvironmentVariableIsSet("ZAP_DESK_RESULTS")) {
+        const QString base = qEnvironmentVariable("ZAP_DESK_RESULTS");
+        QDir().mkpath(base);
+        return base;
+    }
+    QSettings settings;
+    if (settings.contains("paths/results")) {
+        const QString base = settings.value("paths/results").toString();
+        QDir().mkpath(base);
+        return base;
+    }
+    const QString base = dataDir() + "/results";
     QDir().mkpath(base);
     return base;
 }
@@ -81,6 +95,10 @@ QString AppConfig::zapLaunchScript() const {
 QString AppConfig::zapHome() const {
     if (qEnvironmentVariableIsSet("ZAP_HOME")) {
         return qEnvironmentVariable("ZAP_HOME");
+    }
+    QSettings settings;
+    if (settings.contains("zap/home")) {
+        return settings.value("zap/home").toString();
     }
     return QDir(dataDir()).filePath("zap");
 }
@@ -112,5 +130,16 @@ QString AppConfig::zapApiUrl() const {
 int AppConfig::zapApiPort() const {
     bool ok = false;
     const int port = qEnvironmentVariable("ZAP_API_PORT").toInt(&ok);
-    return ok && port > 0 ? port : 8080;
+    if (ok && port > 0) return port;
+
+    QSettings settings;
+    if (settings.contains("zap/port")) {
+        return settings.value("zap/port").toInt();
+    }
+    return 8080;
+}
+
+bool AppConfig::crtOverlayEnabled() const {
+    QSettings settings;
+    return settings.value("ui/crtOverlay", true).toBool();
 }

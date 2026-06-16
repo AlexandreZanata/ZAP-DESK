@@ -1,21 +1,28 @@
 #include "MainWindow.hpp"
 
+#include "components/CrtOverlay.hpp"
+#include "components/FindingsTable.hpp"
+#include "components/HackerTheme.hpp"
+#include "components/LogConsole.hpp"
+#include "components/ReconSummaryPanel.hpp"
+#include "components/ScanHistorySidebar.hpp"
+#include "components/ScanProgressBar.hpp"
+#include "components/SettingsDialog.hpp"
+#include "components/StatusBanner.hpp"
 #include "config/AppConfig.hpp"
 
 #include <QCheckBox>
-#include <QDateTime>
+#include <QDialog>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
-#include <QHeaderView>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMenuBar>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QResizeEvent>
 #include <QTabWidget>
-#include <QTableWidget>
-#include <QTableWidgetItem>
-#include <QTextEdit>
 #include <QVBoxLayout>
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
@@ -26,7 +33,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     connect(&m_pollTimer, &QTimer::timeout, this, &MainWindow::onPollStatus);
     m_pollTimer.start(2000);
 
-    appendLog("ZAP-DESK v0.3.0 — security terminal online");
+    appendLog("ZAP-DESK v0.5.0 — security terminal online");
     appendLog("Reconner path: " + AppConfig::instance().reconnerDir());
     setConnectedUi(m_app.isZapRunning());
     if (m_app.isZapRunning()) m_app.checkZapConnection();
@@ -51,20 +58,19 @@ void MainWindow::wireFacade() {
     connect(&m_app, &presentation::ApplicationFacade::zapConnectionChecked, this,
             [this](bool ok, const QString& version) {
                 if (!ok) {
-                    m_statusLabel->setText(">> STATUS: ZAP BOOTING...");
-                    m_statusLabel->setStyleSheet("color: #ffb000;");
+                    m_statusBanner->setStatusText(">> STATUS: ZAP BOOTING...");
+                    m_statusBanner->setStatusColor("#ffb000");
                     return;
                 }
-                m_statusLabel->setText(QString(">> STATUS: ONLINE — ZAP %1").arg(version));
-                m_statusLabel->setStyleSheet("color: #00ff41;");
+                m_statusBanner->setStatusText(QString(">> STATUS: ONLINE — ZAP %1").arg(version));
+                m_statusBanner->setStatusColor("#00ff41");
                 setConnectedUi(true);
                 appendLog(QString(">> ZAP connected: v%1").arg(version));
             });
 
     connect(&m_app, &presentation::ApplicationFacade::reconPhaseChanged, this,
             [this](int step, int total, const QString& phase, const QString& message) {
-                m_reconProgressLabel->setText(
-                    QString(">> RECON [%1/%2] %3 — %4").arg(step).arg(total).arg(phase, message));
+                m_reconProgress->setPhase(step, total, phase, message);
             });
 
     connect(&m_app, &presentation::ApplicationFacade::reconFinished, this,
@@ -72,12 +78,14 @@ void MainWindow::wireFacade() {
                 m_reconBtn->setEnabled(true);
                 m_stopReconBtn->setEnabled(false);
                 m_feedZapBtn->setEnabled(ok && !summaryPath.isEmpty());
+                m_history->addEntry(currentTarget(), ok);
                 if (ok) {
-                    m_reconSummaryLabel->setText(summaryText);
+                    m_reconSummary->setSummaryText(summaryText);
                     appendLog(">> RECON COMPLETE — " + summaryPath);
+                    m_app.refreshFindings();
                 } else {
-                    m_reconProgressLabel->setText(">> RECON FAILED");
-                    m_reconSummaryLabel->setText(">> RECON SUMMARY: —");
+                    m_reconProgress->setFailed();
+                    m_reconSummary->clear();
                     appendLog(">> RECON FAILED");
                 }
             });
@@ -92,22 +100,21 @@ void MainWindow::wireFacade() {
                                          "\n\nSee docs/ZAP-INSTALL-LINUX.md and reconner/install-tools.sh");
             });
 
-    connect(&m_app, &presentation::ApplicationFacade::alertsReady, this,
-            [this](const QVector<presentation::AlertView>& alerts) {
-                m_alertsTable->setRowCount(alerts.size());
-                for (int i = 0; i < alerts.size(); ++i) {
-                    const auto& a = alerts[i];
-                    m_alertsTable->setItem(i, 0, new QTableWidgetItem(a.risk));
-                    m_alertsTable->setItem(i, 1, new QTableWidgetItem(a.name));
-                    m_alertsTable->setItem(i, 2, new QTableWidgetItem(a.url));
-                    m_alertsTable->setItem(i, 3, new QTableWidgetItem(a.description));
+    connect(&m_app, &presentation::ApplicationFacade::findingsReady, this,
+            [this](const QVector<presentation::FindingView>& findings) {
+                QVector<components::FindingRow> rows;
+                rows.reserve(findings.size());
+                for (const auto& finding : findings) {
+                    rows.push_back({finding.source, finding.risk, finding.name, finding.url,
+                                    finding.description});
                 }
+                m_findings->setFindings(rows);
             });
 
     connect(&m_app, &presentation::ApplicationFacade::scanStatusUpdated, this,
             [this](const QString& text, const QString& colorHex) {
-                m_statusLabel->setText(text);
-                m_statusLabel->setStyleSheet(QString("color: %1;").arg(colorHex));
+                m_statusBanner->setStatusText(text);
+                m_statusBanner->setStatusColor(colorHex);
             });
 
     connect(&m_app, &presentation::ApplicationFacade::zapUpdateChecked, this,
@@ -130,27 +137,26 @@ void MainWindow::wireFacade() {
 }
 
 void MainWindow::setupUi() {
+    auto* menu = menuBar()->addMenu("File");
+    auto* settingsAction = menu->addAction("Settings...");
+    connect(settingsAction, &QAction::triggered, this, &MainWindow::onOpenSettings);
+
     auto* central = new QWidget(this);
-    auto* root = new QVBoxLayout(central);
+    auto* outer = new QHBoxLayout(central);
 
-    m_asciiBanner = new QLabel(
-        "╔══════════════════════════════════════════════════════════╗\n"
-        "║  ZAP-DESK // RECONNER — SECURITY TERMINAL v0.3.0         ║\n"
-        "║  [ OWASP ZAP + RECON PIPELINE ]  :: LINUX EDITION ::    ║\n"
-        "╚══════════════════════════════════════════════════════════╝");
-    m_asciiBanner->setObjectName("banner");
-    root->addWidget(m_asciiBanner);
+    m_history = new components::ScanHistorySidebar;
+    outer->addWidget(m_history);
 
-    m_statusLabel = new QLabel(">> STATUS: OFFLINE");
-    m_statusLabel->setObjectName("status");
-    root->addWidget(m_statusLabel);
+    auto* mainColumn = new QVBoxLayout;
+    m_statusBanner = new components::StatusBanner("0.5.0");
+    mainColumn->addWidget(m_statusBanner);
 
     m_tabs = new QTabWidget;
     auto* zapTab = new QWidget;
     auto* reconTab = new QWidget;
     m_tabs->addTab(zapTab, "[ ZAP ]");
     m_tabs->addTab(reconTab, "[ RECON ]");
-    root->addWidget(m_tabs, 1);
+    mainColumn->addWidget(m_tabs, 1);
 
     auto* zapLayout = new QVBoxLayout(zapTab);
 
@@ -168,7 +174,7 @@ void MainWindow::setupUi() {
     m_activeBtn = new QPushButton("ACTIVE SCAN");
     m_stopScanBtn = new QPushButton("ABORT SCAN");
     m_updateZapBtn = new QPushButton("CHECK ZAP UPDATE");
-    auto* refreshBtn = new QPushButton("REFRESH ALERTS");
+    auto* refreshBtn = new QPushButton("REFRESH FINDINGS");
 
     zapActions->addWidget(m_startZapBtn, 0, 0);
     zapActions->addWidget(m_stopZapBtn, 0, 1);
@@ -179,14 +185,8 @@ void MainWindow::setupUi() {
     zapActions->addWidget(m_updateZapBtn, 3, 0, 1, 2);
     zapLayout->addLayout(zapActions);
 
-    m_alertsTable = new QTableWidget(0, 4);
-    m_alertsTable->setHorizontalHeaderLabels({"RISK", "ALERT", "URL", "DESC"});
-    m_alertsTable->horizontalHeader()->setStretchLastSection(true);
-    m_alertsTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-    m_alertsTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-    m_alertsTable->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
-    zapLayout->addWidget(new QLabel(">> ALERTS"));
-    zapLayout->addWidget(m_alertsTable, 1);
+    m_findings = new components::FindingsTable;
+    zapLayout->addWidget(m_findings, 1);
 
     auto* reconLayout = new QVBoxLayout(reconTab);
 
@@ -215,13 +215,10 @@ void MainWindow::setupUi() {
     reconActions->addWidget(m_pipelineBtn);
     reconLayout->addLayout(reconActions);
 
-    m_reconProgressLabel = new QLabel(">> RECON: idle");
-    m_reconProgressLabel->setObjectName("hint");
-    reconLayout->addWidget(m_reconProgressLabel);
-
-    m_reconSummaryLabel = new QLabel(">> RECON SUMMARY: —");
-    m_reconSummaryLabel->setObjectName("hint");
-    reconLayout->addWidget(m_reconSummaryLabel);
+    m_reconProgress = new components::ScanProgressBar;
+    m_reconSummary = new components::ReconSummaryPanel;
+    reconLayout->addWidget(m_reconProgress);
+    reconLayout->addWidget(m_reconSummary);
 
     auto* reconInfo = new QLabel(
         "Pipeline: subfinder → httpx → nmap → whatweb → gobuster → nuclei\n"
@@ -230,22 +227,24 @@ void MainWindow::setupUi() {
     reconLayout->addWidget(reconInfo);
     reconLayout->addStretch();
 
-    m_log = new QTextEdit;
-    m_log->setReadOnly(true);
-    m_log->setMaximumHeight(180);
-    root->addWidget(new QLabel(">> SYSTEM LOG"));
-    root->addWidget(m_log);
+    m_logConsole = new components::LogConsole;
+    mainColumn->addWidget(m_logConsole);
+
+    outer->addLayout(mainColumn, 1);
 
     setCentralWidget(central);
-    resize(1180, 780);
+    resize(1280, 820);
     setWindowTitle("ZAP-DESK // RECONNER");
+
+    m_crtOverlay = new components::CrtOverlay(central);
+    applyCrtOverlaySetting();
 
     connect(m_startZapBtn, &QPushButton::clicked, this, &MainWindow::onStartZap);
     connect(m_stopZapBtn, &QPushButton::clicked, this, &MainWindow::onStopZap);
     connect(m_ajaxBtn, &QPushButton::clicked, this, &MainWindow::onAjaxScan);
     connect(m_activeBtn, &QPushButton::clicked, this, &MainWindow::onActiveScan);
     connect(m_stopScanBtn, &QPushButton::clicked, this, &MainWindow::onStopScans);
-    connect(refreshBtn, &QPushButton::clicked, this, &MainWindow::onRefreshAlerts);
+    connect(refreshBtn, &QPushButton::clicked, this, &MainWindow::onRefreshFindings);
     connect(m_updateZapBtn, &QPushButton::clicked, this, &MainWindow::onCheckZapUpdate);
     connect(m_reconBtn, &QPushButton::clicked, this, &MainWindow::onStartRecon);
     connect(m_stopReconBtn, &QPushButton::clicked, this, &MainWindow::onStopRecon);
@@ -254,42 +253,27 @@ void MainWindow::setupUi() {
 }
 
 void MainWindow::applyStyle() {
-    setStyleSheet(R"(
-        * { font-family: "Courier New", "DejaVu Sans Mono", "Liberation Mono", monospace; }
-        QMainWindow, QWidget { background: #0a0a0a; color: #00ff41; font-size: 13px; }
-        #banner { color: #00ff41; font-size: 12px; padding: 6px; background: #050505;
-                  border: 1px solid #00ff41; border-radius: 0; }
-        #status { color: #ffb000; font-weight: bold; padding: 4px 0; }
-        #hint { color: #00cccc; font-size: 12px; }
-        QTabWidget::pane { border: 1px solid #00ff41; background: #0a0a0a; }
-        QTabBar::tab { background: #111; color: #00ff41; padding: 8px 16px;
-                       border: 1px solid #004400; margin-right: 2px; }
-        QTabBar::tab:selected { background: #002200; color: #00ff41; border-color: #00ff41; }
-        QGroupBox { border: 1px solid #004400; border-radius: 0; margin-top: 14px; padding-top: 14px;
-                    color: #00cccc; font-weight: bold; }
-        QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 4px; }
-        QLineEdit { background: #000; color: #00ff41; border: 1px solid #00ff41;
-                    border-radius: 0; padding: 8px; selection-background-color: #004400; }
-        QPushButton { background: #001a00; color: #00ff41; border: 1px solid #00ff41;
-                       border-radius: 0; padding: 10px 14px; font-weight: bold; }
-        QPushButton:hover { background: #003300; color: #ffffff; }
-        QPushButton:disabled { background: #111; color: #336633; border-color: #223322; }
-        QCheckBox { color: #00cccc; spacing: 8px; }
-        QCheckBox::indicator { width: 14px; height: 14px; border: 1px solid #00ff41; background: #000; }
-        QCheckBox::indicator:checked { background: #00ff41; }
-        QTableWidget { background: #000; color: #00ff41; gridline-color: #004400;
-                       border: 1px solid #00ff41; border-radius: 0; }
-        QHeaderView::section { background: #001100; color: #00ff41; padding: 6px; border: none;
-                               border-bottom: 1px solid #00ff41; }
-        QTextEdit { background: #000; color: #00ff41; border: 1px solid #004400; border-radius: 0; }
-        QScrollBar:vertical { background: #0a0a0a; width: 12px; }
-        QScrollBar::handle:vertical { background: #004400; min-height: 20px; }
-    )");
+    setStyleSheet(components::HackerTheme::stylesheet());
+}
+
+void MainWindow::applyCrtOverlaySetting() {
+    const bool enabled = AppConfig::instance().crtOverlayEnabled();
+    m_crtOverlay->setVisible(enabled);
+    if (enabled && centralWidget()) {
+        m_crtOverlay->setGeometry(centralWidget()->rect());
+        m_crtOverlay->raise();
+    }
+}
+
+void MainWindow::resizeEvent(QResizeEvent* event) {
+    QMainWindow::resizeEvent(event);
+    if (m_crtOverlay && centralWidget()) {
+        m_crtOverlay->setGeometry(centralWidget()->rect());
+    }
 }
 
 void MainWindow::appendLog(const QString& message) {
-    const auto ts = QDateTime::currentDateTime().toString("HH:mm:ss");
-    m_log->append(QString("[%1] %2").arg(ts, message));
+    m_logConsole->append(message);
 }
 
 QString MainWindow::currentTarget() const {
@@ -304,8 +288,8 @@ void MainWindow::setConnectedUi(bool connected) {
     m_stopScanBtn->setEnabled(connected);
 
     if (!connected) {
-        m_statusLabel->setText(">> STATUS: OFFLINE");
-        m_statusLabel->setStyleSheet("color: #ff3333;");
+        m_statusBanner->setStatusText(">> STATUS: OFFLINE");
+        m_statusBanner->setStatusColor("#ff3333");
     }
 }
 
@@ -317,15 +301,15 @@ void MainWindow::onStopZap() {
 void MainWindow::onAjaxScan() { m_app.startAjaxScan(currentTarget()); }
 void MainWindow::onActiveScan() { m_app.startActiveScan(currentTarget()); }
 void MainWindow::onStopScans() { m_app.stopScans(); }
-void MainWindow::onRefreshAlerts() { m_app.refreshAlerts(); }
+void MainWindow::onRefreshFindings() { m_app.refreshFindings(); }
 void MainWindow::onPollStatus() { m_app.pollScanStatus(); }
 
 void MainWindow::onStartRecon() {
     m_reconBtn->setEnabled(false);
     m_stopReconBtn->setEnabled(true);
     m_feedZapBtn->setEnabled(false);
-    m_reconProgressLabel->setText(">> RECON: starting...");
-    m_reconSummaryLabel->setText(">> RECON SUMMARY: —");
+    m_reconProgress->setPhase(0, 1, "init", "starting...");
+    m_reconSummary->clear();
 
     m_app.startRecon(currentTarget(), m_authorized->isChecked(), m_fastMode->isChecked(),
                      m_skipNuclei->isChecked(), m_useProxy->isChecked());
@@ -343,4 +327,14 @@ void MainWindow::onCheckZapUpdate() { m_app.checkZapUpdate(); }
 void MainWindow::onFullPipeline() {
     m_app.runFullPipeline(currentTarget(), m_authorized->isChecked(), m_fastMode->isChecked(),
                           m_skipNuclei->isChecked(), m_useProxy->isChecked());
+}
+
+void MainWindow::onOpenSettings() {
+    components::SettingsDialog dialog(this);
+    if (dialog.exec() != QDialog::Accepted) return;
+
+    dialog.saveToConfig();
+    m_app.reloadFromConfig();
+    applyCrtOverlaySetting();
+    appendLog(">> Settings saved — restart ZAP if port or home changed.");
 }

@@ -31,6 +31,9 @@ void ApplicationFacade::wireServices() {
 
                 const QString summaryText =
                     ok ? formatSummary(summaryPath.toStdString()) : QString(">> RECON SUMMARY: —");
+                if (ok) {
+                    m_lastSummaryPath = summaryPath;
+                }
                 emit reconFinished(ok, summaryPath, summaryText);
 
                 if (ok && m_fullPipelinePending) {
@@ -103,7 +106,7 @@ void ApplicationFacade::stopScans() {
     emit logMessage(">> ACTIVE SCAN aborted.");
 }
 
-void ApplicationFacade::refreshAlerts() {
+void ApplicationFacade::refreshFindings() {
     m_zapGateway.fetchAlerts([this](const std::vector<domain::SecurityAlert>& alerts,
                                     const std::string& error) {
         if (!error.empty()) {
@@ -111,16 +114,29 @@ void ApplicationFacade::refreshAlerts() {
             return;
         }
 
-        QVector<AlertView> rows;
+        QVector<FindingView> rows;
         rows.reserve(static_cast<int>(alerts.size()));
+
         for (const auto& alert : alerts) {
-            rows.push_back({QString::fromStdString(domain::riskLevelToString(alert.risk())),
+            rows.push_back({"ZAP", QString::fromStdString(domain::riskLevelToString(alert.risk())),
                             QString::fromStdString(alert.name()),
                             QString::fromStdString(alert.url()),
                             QString::fromStdString(alert.description())});
         }
-        emit alertsReady(rows);
-        emit logMessage(QString(">> %1 alert(s) loaded.").arg(rows.size()));
+
+        if (!m_lastSummaryPath.isEmpty()) {
+            const auto nuclei =
+                m_summaryReader.loadNucleiFindings(m_lastSummaryPath.toStdString());
+            for (const auto& item : nuclei) {
+                rows.push_back(
+                    {"nuclei", QString::fromStdString(item.severity),
+                     QString::fromStdString(item.templateId), QString::fromStdString(item.url),
+                     QString::fromStdString(item.description)});
+            }
+        }
+
+        emit findingsReady(rows);
+        emit logMessage(QString(">> %1 finding(s) loaded (ZAP + nuclei).").arg(rows.size()));
     });
 }
 
@@ -296,6 +312,11 @@ void ApplicationFacade::runFullPipeline(const QString& targetUrl, bool authorize
     } else {
         beginRecon();
     }
+}
+
+void ApplicationFacade::reloadFromConfig() {
+    AppConfig::instance().reload();
+    m_client.setBaseUrl(AppConfig::instance().zapApiUrl());
 }
 
 }  // namespace presentation

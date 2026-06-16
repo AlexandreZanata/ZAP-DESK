@@ -6,7 +6,7 @@ int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
     app.setApplicationName("ZAP-DESK");
     app.setOrganizationName("ZAP-DESK");
-    app.setApplicationVersion("0.3.0");
+    app.setApplicationVersion("0.5.0");
 
     MainWindow window;
     window.show();

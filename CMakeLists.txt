@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(ZAP-DESK VERSION 0.3.0 LANGUAGES CXX)
+project(ZAP-DESK VERSION 0.5.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -31,6 +31,18 @@ set(DOMAIN_SOURCES
     src/infrastructure/recon/JsonReconSummaryReader.cpp
 )
 
+set(COMPONENT_SOURCES
+    src/components/HackerTheme.cpp
+    src/components/LogConsole.cpp
+    src/components/ScanProgressBar.cpp
+    src/components/ReconSummaryPanel.cpp
+    src/components/FindingsTable.cpp
+    src/components/ScanHistorySidebar.cpp
+    src/components/StatusBanner.cpp
+    src/components/CrtOverlay.cpp
+    src/components/SettingsDialog.cpp
+)
+
 set(APP_SOURCES
     src/main.cpp
     src/config/AppConfig.cpp
@@ -44,6 +56,7 @@ set(APP_SOURCES
     src/infrastructure/zap/QtZapGateway.cpp
     src/presentation/ApplicationFacade.cpp
     src/ui/MainWindow.cpp
+    ${COMPONENT_SOURCES}
     ${DOMAIN_SOURCES}
 )
 

@@ -18,7 +18,8 @@
 
 namespace presentation {
 
-struct AlertView {
+struct FindingView {
+    QString source;
     QString risk;
     QString name;
     QString url;
@@ -38,7 +39,7 @@ public:
     void startAjaxScan(const QString& targetUrl);
     void startActiveScan(const QString& targetUrl);
     void stopScans();
-    void refreshAlerts();
+    void refreshFindings();
     void pollScanStatus();
 
     void startRecon(const QString& targetUrl, bool authorized, bool fastMode, bool skipNuclei,
@@ -50,6 +51,7 @@ public:
     void runFullPipeline(const QString& targetUrl, bool authorized, bool fastMode, bool skipNuclei,
                          bool useZapProxy);
 
+    void reloadFromConfig();
     bool isZapRunning() const;
 
 signals:
@@ -59,7 +61,7 @@ signals:
     void reconPhaseChanged(int step, int total, const QString& phase, const QString& message);
     void reconFinished(bool ok, const QString& summaryPath, const QString& summaryText);
     void preflightFailed(const QString& details);
-    void alertsReady(const QVector<AlertView>& alerts);
+    void findingsReady(const QVector<FindingView>& findings);
     void zapUpdateChecked(bool updateAvailable, const QString& localVersion,
                           const QString& latestVersion, const QString& releaseUrl);
     void operationFailed(const QString& message);
@@ -84,6 +86,7 @@ private:
 
     std::optional<domain::Scan> m_activeScan;
     bool m_fullPipelinePending{false};
+    QString m_lastSummaryPath;
 };
 
 }  // namespace presentation
