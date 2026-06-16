@@ -3,13 +3,7 @@
 #include <QMainWindow>
 #include <QTimer>
 
-#include "core/ZapClient.hpp"
-#include "core/ZapDaemon.hpp"
-#include "services/ReconPreflight.hpp"
-#include "services/ReconSummary.hpp"
-#include "services/ReconBridge.hpp"
-#include "services/ReconRunner.hpp"
-#include "services/ZapUpdater.hpp"
+#include "presentation/ApplicationFacade.hpp"
 
 class QCheckBox;
 class QLineEdit;
@@ -28,7 +22,6 @@ public:
 private slots:
     void onStartZap();
     void onStopZap();
-    void onCheckConnection();
     void onAjaxScan();
     void onActiveScan();
     void onStopScans();
@@ -39,16 +32,9 @@ private slots:
     void onFeedZapFromRecon();
     void onCheckZapUpdate();
     void onFullPipeline();
-    void launchRecon();
-    void showReconSummary(const QString& summaryPath);
 
 private:
-    ZapClient m_client;
-    ZapDaemon m_daemon;
-    ReconRunner m_recon;
-    ReconBridge m_bridge;
-    ZapUpdater m_updater;
-    ReconPreflight m_preflight;
+    presentation::ApplicationFacade m_app;
     QTimer m_pollTimer;
 
     QTabWidget* m_tabs{};
@@ -78,5 +64,6 @@ private:
     void setConnectedUi(bool connected);
     void setupUi();
     void applyStyle();
+    void wireFacade();
     QString currentTarget() const;
 };

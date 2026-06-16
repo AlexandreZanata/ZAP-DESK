@@ -2,7 +2,7 @@
 
 Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 
-**Current phase: Phase 3 (Domain & Architecture)** — Integration Layer complete; validate with [PHASE2-VALIDATION.md](PHASE2-VALIDATION.md).
+**Current phase: Phase 4 (Testing & CI)** — Domain layer complete; expand automated tests.
 
 ---
 
@@ -13,7 +13,8 @@ Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 | 0 | Foundation | ✅ Done | Monorepo, git, reconner vendored, docs scaffold |
 | 1 | ZAP Desktop Shell | ✅ Done | Qt UI, ZapClient, ZapDaemon, 90s hacker theme |
 | 2 | Integration Layer | ✅ Done | ReconRunner, ReconBridge, ZapUpdater, Full Pipeline |
-| 3 | Domain & Architecture | 🔄 Current | Clean architecture, Result type, entities |
+| 3 | Domain & Architecture | ✅ Done | Clean architecture, Result type, use cases, facade |
+| 4 | Testing & CI | 🔄 Current | GoogleTest, expanded pytest, coverage gates |
 | 4 | Testing & CI | ⏳ Pending | GoogleTest, expanded pytest, coverage gates |
 | 5 | UI Components | ⏳ Pending | Reusable widgets, unified findings view |
 | 6 | Security Hardening | ⏳ Pending | API key support, secure defaults |
@@ -71,20 +72,23 @@ Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 
 ---
 
-## Phase 3 — Domain & Architecture 🔄 (CURRENT)
+## Phase 3 — Domain & Architecture ✅
 
-**Planned:**
-- `src/domain/` — `Scan`, `Target`, `Alert` entities with invariants
-- `src/application/` — use cases (`StartReconUseCase`, `FeedZapUseCase`)
-- `src/shared/result/` — `Result<T, E>` type (no throw in use cases)
-- `src/infrastructure/` — repository implementations
-- Refactor `MainWindow` to call use cases only (thin controller)
+**Delivered:**
+- `shared/result/Result.hpp` + `AppError` / `DomainError`
+- Domain: `TargetUrl`, `ScanId`, `RiskLevel`, `Scan`, `SecurityAlert`
+- Ports: `IReconGateway`, `IZapGateway`, `IPreflightGateway`, `IReconSummaryReader`
+- Use cases: `StartRecon`, `FeedZap`, `RunFullPipeline`, `StartZapScan`
+- Infrastructure: `QtReconGateway`, `QtZapGateway`, `QtPreflightGateway`, `JsonReconSummaryReader`
+- `ApplicationFacade` — presentation layer; `MainWindow` is thin controller
+- Domain unit tests: `tests/unit/test_domain.cpp`
+- [Phase 3 architecture guide](PHASE3-ARCHITECTURE.md)
 
-**Exit criteria:** No business logic in UI slots; domain layer testable without Qt GUI.
+**Exit criteria:** No business logic in UI slots; domain testable without Qt GUI. ✅
 
 ---
 
-## Phase 4 — Testing & CI ⏳
+## Phase 4 — Testing & CI 🔄 (CURRENT)
 
 **Planned:**
 - `tests/unit/` — GoogleTest for ZapClient mocks, ReconBridge JSON parsing
@@ -136,15 +140,15 @@ Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 
 ---
 
-## What to work on next (Phase 3 backlog)
+## What to work on next (Phase 4 backlog)
 
 Priority order:
 
-1. **`src/shared/result/`** — `Result<T, E>` type
-2. **`src/domain/`** — `Scan`, `Target`, `Alert` entities
-3. **`src/application/`** — `StartReconUseCase`, `FeedZapUseCase`
-4. Refactor `MainWindow` to thin controller
-5. Operator sign-off: FULL PIPELINE on authorized target (closes Phase 2)
+1. Expand `tests/unit/` with use-case mocks
+2. Wire `make test` to always run `zap-desk-domain-tests`
+3. Add CI job for domain tests
+4. Coverage thresholds (80% target)
+5. Operator sign-off: FULL PIPELINE on authorized target
 
 ---
 

@@ -12,6 +12,10 @@ build:
 
 test:
 	cd reconner && python3 -m pytest tests/ -q
+	@if [ -f build/zap-desk-domain-tests ]; then build/zap-desk-domain-tests; fi
+
+test-domain: build
+	./build/zap-desk-domain-tests
 
 lint:
 	@command -v ruff >/dev/null && cd reconner && ruff check reconner/ || true

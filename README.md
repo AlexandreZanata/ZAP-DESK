@@ -70,6 +70,7 @@ ZAP-DESK/
 - [Architecture](docs/ARCHITECTURE.md)
 - [Stack](docs/STACK.md)
 - [ZAP + Reconner integration](docs/INTEGRATION.md)
+- [Phase 3 architecture](docs/PHASE3-ARCHITECTURE.md)
 - [Development roadmap](docs/ROADMAP.md)
 - [Phase 2 validation](docs/PHASE2-VALIDATION.md)
 

@@ -20,11 +20,16 @@ Monorepo: **ZAP-DESK** (Qt6/C++20) + **Reconner** (Python in `reconner/`).
 
 ```
 src/config/     → AppConfig (env, XDG paths)
-src/core/       → ZapClient, ZapDaemon
-src/services/   → ReconRunner, ReconBridge, ZapUpdater
-src/ui/         → MainWindow (90s hacker theme)
+src/shared/     → Result, AppError
+src/domain/     → entities, value objects, ports
+src/application/→ use cases
+src/infrastructure/ → Qt gateways, JSON readers
+src/presentation/   → ApplicationFacade
+src/core/       → ZapClient, ZapDaemon (low-level)
+src/services/   → ReconRunner, ReconPreflight, ZapUpdater
+src/ui/         → MainWindow (thin controller)
 reconner/       → vendored Python engine
-docs/           → ARCHITECTURE.md, ROADMAP.md, ZAP-INSTALL-LINUX.md
+docs/           → ARCHITECTURE.md, ROADMAP.md, PHASE3-ARCHITECTURE.md
 ```
 
 ## Main flow
@@ -33,7 +38,7 @@ BOOT ZAP → RUN RECON (--proxy) → FEED ZAP (summary.json) → ACTIVE SCAN
 
 ## Current phase
 
-See `docs/ROADMAP.md` — **Phase 3: Domain & Architecture** (Phase 2 complete).
+See `docs/ROADMAP.md` — **Phase 4: Testing & CI** (Phase 3 complete).
 
 ## Full docs
 
