@@ -6,7 +6,7 @@ Unifies **OWASP ZAP** (spider, active scan, alerts) with **Reconner** (automated
 
 ```
 ╔══════════════════════════════════════════════════════════╗
-║  ZAP-DESK // RECONNER — SECURITY TERMINAL v0.3.0         ║
+║  ZAP-DESK // RECONNER — SECURITY TERMINAL v0.7.0         ║
 ║  [ OWASP ZAP + RECON PIPELINE ]  :: LINUX EDITION ::    ║
 ╚══════════════════════════════════════════════════════════╝
 ```
@@ -18,7 +18,9 @@ Unifies **OWASP ZAP** (spider, active scan, alerts) with **Reconner** (automated
 - Reconner pipeline: subfinder → httpx → nmap → whatweb → gobuster → nuclei
 - Automatic URL feed from `summary.json` into ZAP
 - Full Pipeline: ZAP → Recon → Feed → Active Scan
-- Check and install OWASP ZAP updates automatically
+- Unified findings view (ZAP + nuclei)
+- API key support, audit log, recon rate limiting
+- `.deb` package and desktop entry for Ubuntu/Pop!_OS
 - Phosphorescent green CRT theme (90s)
 
 ## Requirements
@@ -32,24 +34,41 @@ Unifies **OWASP ZAP** (spider, active scan, alerts) with **Reconner** (automated
 
 ## Quick install
 
-```bash
-git clone <your-repo> ZAP-DESK
-cd ZAP-DESK
+### One command (recommended)
 
-make install-deps      # Qt6, cmake, build-essential
-make install-reconner  # pip install reconner
+```bash
+git clone git@github.com:AlexandreZanata/ZAP-DESK.git
+cd ZAP-DESK
+make install-all   # deps + reconner + ZAP + build
+make dev           # run zap-desk
+```
+
+### From .deb package
+
+```bash
+make package-deb
+sudo dpkg -i build/zap-desk_*.deb
+zap-desk   # or launch from application menu
+```
+
+### Manual (development)
+
+```bash
+make install-deps
+make install-reconner
 make build
-make test              # GoogleTest + reconner pytest
-make dev               # run zap-desk
+make test
+make dev
 ```
 
 ## Environment variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `ZAP_DESK_HOME` | auto-detect | Project root |
+| `ZAP_DESK_HOME` | auto-detect | Project / share root |
 | `ZAP_HOME` | `~/.local/share/zap-desk/zap` | ZAP installation |
 | `ZAP_LAUNCH_SCRIPT` | `scripts/zap-launch.sh` | ZAP launcher |
+| `ZAP_API_KEY` | — | ZAP REST API key |
 | `ZAP_API_PORT` | `8080` | ZAP API port |
 | `RECONNER_DIR` | `<root>/reconner` | Recon engine |
 | `ZAP_DESK_RESULTS` | XDG AppData | Results directory |
@@ -60,7 +79,8 @@ make dev               # run zap-desk
 ZAP-DESK/
 ├── reconner/          # Python engine (Reconner v2.0.0)
 ├── src/               # Qt6/C++20 app
-├── scripts/           # Build, ZAP launcher, update
+├── packaging/         # .desktop, icons, deb postinst
+├── scripts/           # Build, install, package
 ├── docs/              # Architecture and integration
 └── .cursor/rules/     # Cursor Agent rules
 ```
@@ -68,16 +88,14 @@ ZAP-DESK/
 ## Documentation
 
 - [Install and configure OWASP ZAP on Linux](docs/ZAP-INSTALL-LINUX.md)
+- [Subdomain discovery guide](docs/SUBDOMAIN-DISCOVERY.md)
+- [Packaging & release](docs/PHASE7-PACKAGING.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Stack](docs/STACK.md)
 - [ZAP + Reconner integration](docs/INTEGRATION.md)
 - [Development roadmap](docs/ROADMAP.md)
-- [Phase 4 testing](docs/PHASE4-TESTING.md)
-- [Phase 2 validation](docs/PHASE2-VALIDATION.md)
 
 ## Update OWASP ZAP
-
-See also: [docs/ZAP-INSTALL-LINUX.md](docs/ZAP-INSTALL-LINUX.md#updating-zap)
 
 ```bash
 make update-zap

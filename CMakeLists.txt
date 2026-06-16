@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(ZAP-DESK VERSION 0.6.0 LANGUAGES CXX)
+project(ZAP-DESK VERSION 0.7.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -151,3 +151,42 @@ if(ZAP_DESK_ENABLE_INTEGRATION_TESTS)
 endif()
 
 install(TARGETS zap-desk RUNTIME DESTINATION bin)
+
+install(FILES packaging/zap-desk.desktop DESTINATION share/applications)
+install(FILES packaging/icons/zap-desk.svg DESTINATION share/icons/hicolor/scalable/apps)
+
+install(DIRECTORY reconner/
+    DESTINATION share/zap-desk/reconner
+    USE_SOURCE_PERMISSIONS
+    PATTERN "__pycache__" EXCLUDE
+    PATTERN "*.pyc" EXCLUDE
+    PATTERN ".pytest_cache" EXCLUDE
+    PATTERN "*.egg-info" EXCLUDE
+)
+
+install(PROGRAMS
+    scripts/zap-launch.sh
+    scripts/update-zap.sh
+    DESTINATION share/zap-desk/scripts
+)
+
+# ---------------------------------------------------------------------------
+# CPack — .deb package (make package-deb)
+# ---------------------------------------------------------------------------
+
+set(CPACK_PACKAGE_NAME "zap-desk")
+set(CPACK_PACKAGE_VENDOR "ZAP-DESK")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "OWASP ZAP + Reconner security terminal")
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+set(CPACK_PACKAGE_CONTACT "https://github.com/AlexandreZanata/ZAP-DESK")
+set(CPACK_GENERATOR "DEB")
+set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS
+    "libqt6widgets6 (>= 6.2), libqt6network6 (>= 6.2), python3, python3-pip, curl"
+)
+set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "nmap, chromium-browser | chromium")
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
+    "${CMAKE_SOURCE_DIR}/packaging/debian/postinst"
+)
+
+include(CPack)

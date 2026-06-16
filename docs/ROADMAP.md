@@ -2,7 +2,7 @@
 
 Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 
-**Current phase: Phase 7 (Packaging & Release)** — Security Hardening complete.
+**Current phase: complete** — all roadmap phases delivered (v0.7.0).
 
 ---
 
@@ -17,7 +17,7 @@ Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 | 4 | Testing & CI | ✅ Done | GoogleTest, pytest coverage, CI pipeline |
 | 5 | UI Components | ✅ Done | Reusable widgets, unified findings view |
 | 6 | Security Hardening | ✅ Done | API key support, secure defaults |
-| 7 | Packaging & Release | 🔄 Current | AppImage/deb, installer, auto-update polish |
+| 7 | Packaging & Release | ✅ Done | AppImage/deb, installer, release workflow |
 
 ---
 
@@ -132,27 +132,25 @@ Phased plan for building the unified ZAP-DESK + Reconner security terminal.
 
 ---
 
-## Phase 7 — Packaging & Release 🔄 (CURRENT)
+## Phase 7 — Packaging & Release ✅
 
-**Planned:**
-- AppImage or `.deb` package
-- Desktop entry (`zap-desk.desktop`)
-- Bundled install script for ZAP + recon tools
-- Release workflow on GitHub (tag → build → attach artifacts)
-- Subdomain discovery guide (English) in `docs/`
+**Delivered:**
+- `.deb` package via CPack (`make package-deb`)
+- AppDir bundle (`make package-appimage`)
+- Desktop entry `packaging/zap-desk.desktop` + SVG icon
+- `scripts/install-all.sh` — one-command install from source
+- `AppConfig` FHS layout detection (`/usr/share/zap-desk`)
+- GitHub release workflow (tag `v*` → `.deb` + AppDir archive)
+- [Subdomain discovery guide](SUBDOMAIN-DISCOVERY.md)
+- [Phase 7 packaging guide](PHASE7-PACKAGING.md)
 
-**Exit criteria:** One-command install for end users on Ubuntu/Pop!_OS.
+**Exit criteria:** One-command install for end users on Ubuntu/Pop!_OS. ✅
 
 ---
 
-## What to work on next (Phase 7 backlog)
+## Roadmap complete
 
-Priority order:
-
-1. AppImage or `.deb` package
-2. Desktop entry (`zap-desk.desktop`)
-3. Bundled install script for ZAP + recon tools
-4. GitHub release workflow (tag → build → artifacts)
+All planned phases (0–7) are delivered. Future work: keyring integration, full AppImage with bundled Qt, Flatpak.
 
 ---
 
@@ -163,4 +161,6 @@ Priority order:
 - [Integration](INTEGRATION.md)
 - [Phase 5 UI](PHASE5-UI.md)
 - [Phase 6 Security](PHASE6-SECURITY.md)
+- [Phase 7 Packaging](PHASE7-PACKAGING.md)
+- [Subdomain discovery](SUBDOMAIN-DISCOVERY.md)
 - [Stack](STACK.md)

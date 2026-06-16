@@ -1,0 +1,19 @@
+#!/bin/sh
+set -e
+
+if command -v python3 >/dev/null 2>&1; then
+  python3 -m pip install --user --break-system-packages \
+    /usr/share/zap-desk/reconner 2>/dev/null \
+    || python3 -m pip install --user /usr/share/zap-desk/reconner 2>/dev/null \
+    || true
+fi
+
+if command -v update-desktop-database >/dev/null 2>&1; then
+  update-desktop-database /usr/share/applications || true
+fi
+
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+  gtk-update-icon-cache -f /usr/share/icons/hicolor 2>/dev/null || true
+fi
+
+exit 0

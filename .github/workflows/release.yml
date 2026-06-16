@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential qt6-base-dev qt6-tools-dev-tools dpkg-dev
+
+      - name: Build .deb package
+        run: |
+          chmod +x scripts/package-deb.sh scripts/package-appimage.sh
+          ./scripts/package-deb.sh
+          ./scripts/package-appimage.sh
+
+      - name: Archive AppDir
+        run: |
+          cd build
+          tar -czf ZAP-DESK-AppDir.tar.gz ZAP-DESK.AppDir
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/*.deb
+            build/ZAP-DESK-AppDir.tar.gz
+          generate_release_notes: true

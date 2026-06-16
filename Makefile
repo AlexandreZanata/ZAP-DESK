@@ -1,4 +1,4 @@
-.PHONY: dev build test test-unit test-reconner test-integration test-domain validate-phase2 validate-phase4 lint install-deps install-reconner update-zap clean
+.PHONY: dev build test test-unit test-reconner test-integration test-domain validate-phase2 validate-phase4 validate-phase7 lint install-deps install-reconner install-all package-deb package-appimage update-zap clean
 
 BUILD_DIR := build
 CMAKE_FLAGS := -DCMAKE_BUILD_TYPE=Release
@@ -34,6 +34,18 @@ install-deps:
 install-reconner:
 	./scripts/install-reconner.sh
 
+install-all:
+	chmod +x scripts/install-all.sh
+	./scripts/install-all.sh
+
+package-deb:
+	chmod +x scripts/package-deb.sh
+	./scripts/package-deb.sh
+
+package-appimage:
+	chmod +x scripts/package-appimage.sh
+	./scripts/package-appimage.sh
+
 update-zap:
 	./scripts/update-zap.sh
 
@@ -43,6 +55,10 @@ validate-phase2:
 validate-phase4:
 	chmod +x scripts/validate-phase4.sh
 	./scripts/validate-phase4.sh
+
+validate-phase7:
+	chmod +x scripts/validate-phase7.sh
+	./scripts/validate-phase7.sh
 
 clean:
 	rm -rf $(BUILD_DIR)

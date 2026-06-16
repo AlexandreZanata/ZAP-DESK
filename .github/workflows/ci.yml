@@ -67,3 +67,11 @@ jobs:
         run: |
           chmod +x scripts/validate-phase2.sh
           ./scripts/validate-phase2.sh
+
+  validate-phase7:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Phase 7 packaging validation
+        run: ./scripts/validate-phase7.sh

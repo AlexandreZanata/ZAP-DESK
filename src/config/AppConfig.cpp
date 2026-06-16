@@ -27,8 +27,15 @@ QString AppConfig::detectProjectRoot() const {
     }
 
     const QString appDir = QCoreApplication::applicationDirPath();
-    QDir dir(appDir);
+    QDir prefixDir(appDir);
+    if (prefixDir.cdUp()) {
+        const QString shareRoot = prefixDir.filePath("share/zap-desk");
+        if (QFileInfo::exists(QDir(shareRoot).filePath("reconner/setup.py"))) {
+            return shareRoot;
+        }
+    }
 
+    QDir dir(appDir);
     for (int i = 0; i < 5; ++i) {
         if (QFileInfo::exists(dir.filePath("reconner/setup.py"))) {
             return dir.absolutePath();

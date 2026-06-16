@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=ZAP-DESK
+GenericName=Security Terminal
+Comment=OWASP ZAP + Reconner security terminal for Linux
+Exec=zap-desk
+Icon=zap-desk
+Terminal=false
+Categories=Development;Security;
+Keywords=security;zap;owasp;recon;pentest;
+StartupWMClass=zap-desk
