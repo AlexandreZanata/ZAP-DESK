@@ -52,7 +52,7 @@ QString ReconRunner::lastSummaryPath() const {
 
 void ReconRunner::start(const QString& target, bool fastMode, bool skipNuclei, bool useZapProxy) {
     if (m_state == State::Running) {
-        emit logLine("Recon já em execução.");
+        emit logLine("Recon already running.");
         return;
     }
 
@@ -89,7 +89,7 @@ void ReconRunner::start(const QString& target, bool fastMode, bool skipNuclei, b
 void ReconRunner::stop() {
     if (m_process.state() != QProcess::NotRunning) {
         m_process.terminate();
-        emit logLine("Recon interrompido.");
+        emit logLine("Recon stopped.");
     }
     setState(State::Idle);
 }

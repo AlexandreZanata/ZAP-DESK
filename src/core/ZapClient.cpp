@@ -103,7 +103,7 @@ void ZapClient::stopActiveScan(std::function<void(bool)> callback) {
 void ZapClient::fetchAlerts(std::function<void(QVector<ZapAlert>, QString)> callback) {
     get("/JSON/alert/view/alerts/?start=0&count=200", [callback](bool ok, const QString& body) {
         if (!ok) {
-            callback({}, "Falha ao buscar alertas");
+            callback({}, "Failed to fetch alerts");
             return;
         }
 

@@ -1,50 +1,50 @@
-# ZAP-DESK — Arquitetura Enterprise (C++/Linux)
+# ZAP-DESK — Enterprise Architecture (C++/Linux)
 
-> Monorepo unificado: **ZAP-DESK** (Qt6/C++20) + **Reconner** (Python 3.10+)
-> Domínio: plataforma desktop de segurança ofensiva autorizada para Linux.
-
----
-
-## CONTEXTO
-
-ZAP-DESK é um terminal de segurança desktop com tema hacker anos 90 que orquestra:
-
-1. **OWASP ZAP** — proxy, spider, active scan, alertas
-2. **Reconner** — pipeline de recon (subfinder → httpx → nmap → whatweb → gobuster → nuclei)
-
-O sistema deve parecer produzido por um time sênior — não um wrapper trivial.
+> Unified monorepo: **ZAP-DESK** (Qt6/C++20) + **Reconner** (Python 3.10+)
+> Domain: authorized offensive security desktop platform for Linux.
 
 ---
 
-## STACK OBRIGATÓRIA
+## CONTEXT
 
-| Camada | Tecnologia |
-|--------|------------|
-| **UI Desktop** | Qt6 Widgets (C++20) |
+ZAP-DESK is a 90s hacker-themed desktop security terminal that orchestrates:
+
+1. **OWASP ZAP** — proxy, spider, active scan, alerts
+2. **Reconner** — recon pipeline (subfinder → httpx → nmap → whatweb → gobuster → nuclei)
+
+The system should feel like it was built by a senior team — not a trivial wrapper.
+
+---
+
+## REQUIRED STACK
+
+| Layer | Technology |
+|-------|------------|
+| **Desktop UI** | Qt6 Widgets (C++20) |
 | **HTTP Client** | QNetworkAccessManager (ZAP REST API) |
-| **Processos** | QProcess (ZAP daemon, Reconner, scripts shell) |
-| **Recon Engine** | Python 3.10+ / Reconner 2.0.0 (vendored em `reconner/`) |
+| **Processes** | QProcess (ZAP daemon, Reconner, shell scripts) |
+| **Recon Engine** | Python 3.10+ / Reconner 2.0.0 (vendored in `reconner/`) |
 | **Build** | CMake 3.16+ |
-| **Testes C++** | GoogleTest + Qt Test |
-| **Testes Python** | pytest (reconner/tests/) |
-| **Lint C++** | clang-tidy + clang-format |
-| **Lint Python** | ruff + black + mypy |
-| **Logging** | QTextEdit UI + journal estruturado (futuro: spdlog) |
-| **Config** | AppConfig + variáveis de ambiente |
+| **C++ Tests** | GoogleTest + Qt Test |
+| **Python Tests** | pytest (reconner/tests/) |
+| **C++ Lint** | clang-tidy + clang-format |
+| **Python Lint** | ruff + black + mypy |
+| **Logging** | QTextEdit UI + structured journal (future: spdlog) |
+| **Config** | AppConfig + environment variables |
 | **CI** | GitHub Actions |
-| **Containerização** | Docker opcional para CI (reconner) |
-| **Atualizações ZAP** | GitHub API + scripts/update-zap.sh |
+| **Containerization** | Optional Docker for CI (reconner) |
+| **ZAP Updates** | GitHub API + scripts/update-zap.sh |
 
 ---
 
-## ESTRUTURA DE PASTAS
+## FOLDER STRUCTURE
 
 ```
 ZAP-DESK/
-├── .cursor/rules/              # Regras Cursor Agent
-├── docs/                       # Documentação arquitetural
-├── reconner/                   # Engine Python (vendored)
-│   ├── reconner/               # Pacote Python
+├── .cursor/rules/              # Cursor Agent rules
+├── docs/                       # Architecture documentation
+├── reconner/                   # Python engine (vendored)
+│   ├── reconner/               # Python package
 │   ├── tests/
 │   └── setup.py
 ├── scripts/
@@ -57,20 +57,20 @@ ZAP-DESK/
 │   ├── config/
 │   │   └── AppConfig.*         # Paths, env, XDG
 │   ├── core/
-│   │   ├── ZapClient.*         # Cliente REST ZAP
-│   │   └── ZapDaemon.*         # Lifecycle ZAP
-│   ├── domain/                 # Entidades puras (futuro)
-│   ├── application/            # Use cases (futuro)
-│   ├── infrastructure/         # Adaptadores (futuro)
+│   │   ├── ZapClient.*         # ZAP REST client
+│   │   └── ZapDaemon.*         # ZAP lifecycle
+│   ├── domain/                 # Pure entities (future)
+│   ├── application/            # Use cases (future)
+│   ├── infrastructure/         # Adapters (future)
 │   ├── services/
-│   │   ├── ReconRunner.*       # Orquestra reconner via QProcess
+│   │   ├── ReconRunner.*       # Orchestrates reconner via QProcess
 │   │   ├── ReconBridge.*       # summary.json → ZAP
-│   │   └── ZapUpdater.*        # Auto-update ZAP
+│   │   └── ZapUpdater.*        # ZAP auto-update
 │   ├── ui/
-│   │   └── MainWindow.*        # Interface hacker 90s
-│   ├── components/             # Widgets reutilizáveis (futuro)
+│   │   └── MainWindow.*        # 90s hacker interface
+│   ├── components/             # Reusable widgets (future)
 │   └── main.cpp
-├── tests/                      # Testes C++ (futuro)
+├── tests/                      # C++ tests (future)
 ├── CMakeLists.txt
 ├── Makefile
 └── README.md
@@ -78,44 +78,44 @@ ZAP-DESK/
 
 ---
 
-## REGRAS DE DOMÍNIO
+## DOMAIN RULES
 
-### Entidades (evolução planejada)
+### Entities (planned evolution)
 
-- Toda entidade de scan: `id`, `targetId`, `createdAt`, `updatedAt`, `status`, `version`
-- Entidades **nunca** importam Qt Network ou QProcess diretamente
-- Validação de invariantes no construtor — falha com `DomainError`
+- Every scan entity: `id`, `targetId`, `createdAt`, `updatedAt`, `status`, `version`
+- Entities **never** import Qt Network or QProcess directly
+- Invariant validation in the constructor — fails with `DomainError`
 
 ### Value Objects
 
-- `TargetUrl` — URL normalizada com validação
+- `TargetUrl` — normalized URL with validation
 - `ScanId` — ULID/UUID
-- `RiskLevel` — enum tipado para alertas ZAP
+- `RiskLevel` — typed enum for ZAP alerts
 
 ### Domain Events
 
 - `ScanStarted`, `ScanCompleted`, `ZapFed`, `AlertReceived`
-- Publicados após operações bem-sucedidas via event bus interno
+- Published after successful operations via internal event bus
 
-### Repositórios
+### Repositories
 
-- Interface em `domain/` — retorna entidades, não JSON bruto
-- Implementação em `infrastructure/` — mapeia summary.json / ZAP API
+- Interface in `domain/` — returns entities, not raw JSON
+- Implementation in `infrastructure/` — maps summary.json / ZAP API
 
 ---
 
-## INTEGRAÇÃO ZAP + RECONNER
+## ZAP + RECONNER INTEGRATION
 
-### Fluxo FULL PIPELINE
+### FULL PIPELINE flow
 
 ```
 [BOOT ZAP] → [RUN RECON --proxy 127.0.0.1:8080] → [summary.json]
     → [FEED ZAP URLs] → [ACTIVE SCAN] → [ALERTS]
 ```
 
-### Contrato de integração
+### Integration contract
 
-O arquivo `summary.json` é o handshake entre Reconner e ZAP-DESK:
+The `summary.json` file is the handshake between Reconner and ZAP-DESK:
 
 ```json
 {
@@ -125,74 +125,74 @@ O arquivo `summary.json` é o handshake entre Reconner e ZAP-DESK:
 }
 ```
 
-### Atualizações automáticas ZAP
+### Automatic ZAP updates
 
-1. `ZapUpdater` consulta `api.github.com/repos/zaproxy/zap/releases/latest`
-2. Compara versão local (ZAP API) vs release
-3. Executa `scripts/update-zap.sh` sob confirmação do usuário
-
----
-
-## SEGURANÇA
-
-- Recon **somente** com checkbox de autorização escrita na UI
-- ZAP local com `api.disablekey=true` apenas em dev — produção deve usar API key
-- Nunca logar credenciais ou tokens
-- Paths configuráveis via env — sem hardcode de paths de máquina
-
-### Variáveis de ambiente
-
-| Variável | Descrição |
-|----------|-----------|
-| `ZAP_DESK_HOME` | Raiz do projeto |
-| `ZAP_HOME` | Instalação OWASP ZAP |
-| `ZAP_LAUNCH_SCRIPT` | Script de boot do ZAP |
-| `ZAP_API_PORT` | Porta API (default 8080) |
-| `RECONNER_DIR` | Diretório do reconner |
-| `ZAP_DESK_RESULTS` | Diretório de resultados |
+1. `ZapUpdater` queries `api.github.com/repos/zaproxy/zap/releases/latest`
+2. Compares local version (ZAP API) vs release
+3. Runs `scripts/update-zap.sh` after user confirmation
 
 ---
 
-## OBSERVABILIDADE
+## SECURITY
 
-### Logging UI
+- Recon **only** with written authorization checkbox in the UI
+- Local ZAP with `api.disablekey=true` in dev only — production must use an API key
+- Never log credentials or tokens
+- Configurable paths via env — no hardcoded machine paths
 
-- Timestamps em todo log da interface
-- Prefixos `>>` estilo terminal CRT
-- Cores por severidade via stylesheet
+### Environment variables
 
-### Health Checks (futuro)
+| Variable | Description |
+|----------|-------------|
+| `ZAP_DESK_HOME` | Project root |
+| `ZAP_HOME` | OWASP ZAP installation |
+| `ZAP_LAUNCH_SCRIPT` | ZAP boot script |
+| `ZAP_API_PORT` | API port (default 8080) |
+| `RECONNER_DIR` | Reconner directory |
+| `ZAP_DESK_RESULTS` | Results directory |
+
+---
+
+## OBSERVABILITY
+
+### UI logging
+
+- Timestamps on every interface log line
+- `>>` prefixes in CRT terminal style
+- Severity colors via stylesheet
+
+### Health checks (future)
 
 - ZAP API `/JSON/core/view/version/`
 - Reconner `python3 -m reconner --version`
-- Ferramentas externas via `check_tool_exists`
+- External tools via `check_tool_exists`
 
 ---
 
-## TESTES — ESTRATÉGIA TDD
+## TESTING — TDD STRATEGY
 
 ```
 tests/           # C++ GoogleTest
 reconner/tests/  # Python pytest
 ```
 
-### Cobertura mínima alvo
+### Minimum coverage targets
 
 - statements: 80%
 - branches: 75%
 - functions: 80%
 
-### Para cada serviço C++:
+### For each C++ service:
 
-- Teste unitário com mocks
-- Teste do caminho feliz
-- Teste de cada erro possível
+- Unit test with mocks
+- Happy-path test
+- Test for each possible error
 
 ---
 
-## PADRÕES DE CÓDIGO
+## CODE PATTERNS
 
-### Result Type (C++ — evolução)
+### Result type (C++ — evolution)
 
 ```cpp
 template<typename T, typename E = AppError>
@@ -203,9 +203,9 @@ class Result {
 };
 ```
 
-Use Cases retornam `Result<T>` — controllers interpretam para UI.
+Use cases return `Result<T>` — controllers interpret for the UI.
 
-### Repository Pattern
+### Repository pattern
 
 ```cpp
 class ScanRepository {
@@ -225,26 +225,34 @@ make test         # pytest + ctest
 make lint         # clang-format + ruff
 make build        # cmake release
 make install-deps # apt + reconner
-make update-zap   # atualiza OWASP ZAP
+make update-zap   # update OWASP ZAP
 ```
 
 ---
 
-## O QUE NÃO FAZER
+## WHAT NOT TO DO
 
-- ❌ Lógica de negócio em slots de UI além de orquestração
-- ❌ Paths hardcoded (usar AppConfig)
-- ❌ `console.log` equivalente sem timestamp
-- ❌ Executar recon sem confirmação de autorização
-- ❌ Queries ZAP fora do ZapClient
-- ❌ Deletar resultados de scan sem confirmação
+- ❌ Business logic in UI slots beyond orchestration
+- ❌ Hardcoded paths (use AppConfig)
+- ❌ `console.log` equivalent without a timestamp
+- ❌ Run recon without authorization confirmation
+- ❌ ZAP queries outside ZapClient
+- ❌ Delete scan results without confirmation
 
 ---
 
-## ADICIONAR NOVOS MÓDULOS
+## ADDING NEW MODULES
 
-1. Criar interface em `domain/`
-2. Implementar use case em `application/`
-3. Adaptador em `infrastructure/` ou `services/`
-4. Conectar na UI via sinais Qt
-5. Escrever testes antes da implementação (TDD)
+1. Create interface in `domain/`
+2. Implement use case in `application/`
+3. Adapter in `infrastructure/` or `services/`
+4. Wire into UI via Qt signals
+5. Write tests before implementation (TDD)
+
+---
+
+## Related docs
+
+- [ZAP + Reconner integration](INTEGRATION.md)
+- [Technical stack](STACK.md)
+- [Development roadmap](ROADMAP.md)

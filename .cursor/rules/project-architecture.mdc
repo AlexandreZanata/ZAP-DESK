@@ -1,35 +1,40 @@
 ---
-description: Arquitetura e padrões core do ZAP-DESK (C++/Qt/Linux)
+description: Core architecture and patterns for ZAP-DESK (C++/Qt/Linux)
 alwaysApply: true
 ---
 
-# ZAP-DESK — Regras do Projeto
+# ZAP-DESK — Project Rules
 
-Monorepo: **ZAP-DESK** (Qt6/C++20) + **Reconner** (Python em `reconner/`).
+Monorepo: **ZAP-DESK** (Qt6/C++20) + **Reconner** (Python in `reconner/`).
 
-## Princípios
+## Principles
 
-- UI em `src/ui/` — apenas orquestração, sem lógica de domínio
-- ZAP REST API somente via `ZapClient`
-- Recon somente via `ReconRunner` → `python3 -m reconner`
-- Paths via `AppConfig` — nunca hardcode `/data/dev/...`
-- Recon exige autorização confirmada na UI antes de executar
+- UI in `src/ui/` — orchestration only, no domain logic
+- ZAP REST API only via `ZapClient`
+- Recon only via `ReconRunner` → `python3 -m reconner`
+- Paths via `AppConfig` — never hardcode `/data/dev/...`
+- Recon requires authorization checkbox in UI before execution
+- **All docs, UI strings, and comments in English** (see `english-only.mdc`)
 
-## Estrutura
+## Structure
 
 ```
 src/config/     → AppConfig (env, XDG paths)
 src/core/       → ZapClient, ZapDaemon
 src/services/   → ReconRunner, ReconBridge, ZapUpdater
-src/ui/         → MainWindow (tema hacker 90s)
-reconner/       → engine Python vendored
-docs/           → ARCHITECTURE.md, STACK.md, INTEGRATION.md
+src/ui/         → MainWindow (90s hacker theme)
+reconner/       → vendored Python engine
+docs/           → ARCHITECTURE.md, ROADMAP.md, ZAP-INSTALL-LINUX.md
 ```
 
-## Fluxo principal
+## Main flow
 
 BOOT ZAP → RUN RECON (--proxy) → FEED ZAP (summary.json) → ACTIVE SCAN
 
-## Docs completos
+## Current phase
 
-Consulte `docs/ARCHITECTURE.md` antes de mudanças estruturais.
+See `docs/ROADMAP.md` — **Phase 2: Integration Layer**.
+
+## Full docs
+
+Read `docs/ARCHITECTURE.md` before structural changes.

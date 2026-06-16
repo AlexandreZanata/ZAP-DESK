@@ -1,8 +1,8 @@
 # ZAP-DESK
 
-Terminal de segurança desktop para Linux — tema hacker anos 90.
+Desktop security terminal for Linux — 90s hacker theme.
 
-Unifica **OWASP ZAP** (spider, active scan, alertas) com **Reconner** (pipeline de recon automatizado) em uma única interface Qt6.
+Unifies **OWASP ZAP** (spider, active scan, alerts) with **Reconner** (automated recon pipeline) in a single Qt6 interface.
 
 ```
 ╔══════════════════════════════════════════════════════════╗
@@ -11,77 +11,81 @@ Unifica **OWASP ZAP** (spider, active scan, alertas) com **Reconner** (pipeline 
 ╚══════════════════════════════════════════════════════════╝
 ```
 
-## Funcionalidades
+## Features
 
-- Boot/stop do OWASP ZAP em modo daemon
-- AJAX Spider e Active Scan via REST API
-- Pipeline Reconner: subfinder → httpx → nmap → whatweb → gobuster → nuclei
-- Feed automático de URLs do `summary.json` para o ZAP
+- Boot/stop OWASP ZAP in daemon mode
+- AJAX Spider and Active Scan via REST API
+- Reconner pipeline: subfinder → httpx → nmap → whatweb → gobuster → nuclei
+- Automatic URL feed from `summary.json` into ZAP
 - Full Pipeline: ZAP → Recon → Feed → Active Scan
-- Verificação e instalação automática de atualizações do ZAP
-- Tema CRT verde fosforescente (anos 90)
+- Check and install OWASP ZAP updates automatically
+- Phosphorescent green CRT theme (90s)
 
-## Requisitos
+## Requirements
 
-- Linux (Ubuntu/Debian recomendado)
-- CMake 3.16+, GCC com C++20
+- Linux (Ubuntu/Debian/Pop!_OS recommended)
+- CMake 3.16+, GCC with C++20
 - Qt6 (Widgets + Network)
 - Python 3.10+
-- OWASP ZAP instalado
-- Ferramentas de recon (subfinder, httpx, nmap, etc.) — ver `reconner/install-tools.sh`
+- **OWASP ZAP** — [complete Linux installation guide](docs/ZAP-INSTALL-LINUX.md)
+- Recon tools (subfinder, httpx, nmap, etc.) — see `reconner/install-tools.sh`
 
-## Instalação rápida
+## Quick install
 
 ```bash
-git clone <seu-repo> ZAP-DESK
+git clone <your-repo> ZAP-DESK
 cd ZAP-DESK
 
 make install-deps      # Qt6, cmake, build-essential
 make install-reconner  # pip install reconner
 make build
-make dev               # executa zap-desk
+make dev               # run zap-desk
 ```
 
-## Variáveis de ambiente
+## Environment variables
 
-| Variável | Default | Descrição |
-|----------|---------|-----------|
-| `ZAP_DESK_HOME` | auto-detect | Raiz do projeto |
-| `ZAP_HOME` | `/data/dev/tools/zap` | Instalação ZAP |
-| `ZAP_LAUNCH_SCRIPT` | `scripts/zap-launch.sh` | Launcher ZAP |
-| `ZAP_API_PORT` | `8080` | Porta API ZAP |
-| `RECONNER_DIR` | `<root>/reconner` | Engine recon |
-| `ZAP_DESK_RESULTS` | XDG AppData | Resultados |
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ZAP_DESK_HOME` | auto-detect | Project root |
+| `ZAP_HOME` | `/data/dev/tools/zap` | ZAP installation |
+| `ZAP_LAUNCH_SCRIPT` | `scripts/zap-launch.sh` | ZAP launcher |
+| `ZAP_API_PORT` | `8080` | ZAP API port |
+| `RECONNER_DIR` | `<root>/reconner` | Recon engine |
+| `ZAP_DESK_RESULTS` | XDG AppData | Results directory |
 
-## Estrutura
+## Structure
 
 ```
 ZAP-DESK/
-├── reconner/          # Engine Python (Reconner v2.0.0)
-├── src/               # App Qt6/C++20
+├── reconner/          # Python engine (Reconner v2.0.0)
+├── src/               # Qt6/C++20 app
 ├── scripts/           # Build, ZAP launcher, update
-├── docs/              # Arquitetura e integração
-└── .cursor/rules/     # Regras Cursor Agent
+├── docs/              # Architecture and integration
+└── .cursor/rules/     # Cursor Agent rules
 ```
 
-## Documentação
+## Documentation
 
-- [Arquitetura](docs/ARCHITECTURE.md)
+- [Install and configure OWASP ZAP on Linux](docs/ZAP-INSTALL-LINUX.md)
+- [Architecture](docs/ARCHITECTURE.md)
 - [Stack](docs/STACK.md)
-- [Integração ZAP + Reconner](docs/INTEGRATION.md)
+- [ZAP + Reconner integration](docs/INTEGRATION.md)
+- [Development roadmap](docs/ROADMAP.md)
 
-## Atualizar OWASP ZAP
+## Update OWASP ZAP
+
+See also: [docs/ZAP-INSTALL-LINUX.md](docs/ZAP-INSTALL-LINUX.md#updating-zap)
 
 ```bash
 make update-zap
-# ou via UI: CHECK ZAP UPDATE
+# or via UI: CHECK ZAP UPDATE
 ```
 
-## Aviso legal
+## Legal notice
 
-Este software é para **testes de segurança autorizados** apenas. O operador deve possuir autorização escrita antes de escanear qualquer alvo.
+This software is for **authorized security testing** only. The operator must have written authorization before scanning any target.
 
-## Licença
+## License
 
-ZAP-DESK: MIT (a definir)
-Reconner: MIT — ver `reconner/LICENSE`
+ZAP-DESK: MIT (TBD)
+Reconner: MIT — see `reconner/LICENSE`

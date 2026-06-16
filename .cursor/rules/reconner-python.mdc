@@ -1,14 +1,15 @@
 ---
-description: Regras para o engine Python Reconner vendored
+description: Rules for the vendored Reconner Python engine
 globs: "reconner/**"
 alwaysApply: false
 ---
 
 # Reconner (Python)
 
-- Pacote em `reconner/reconner/` — não mover sem atualizar ReconRunner
-- Invocado pelo C++ via `python3 -m reconner --quiet`
-- Autorização legal: UI C++ confirma; CLI usa `--quiet` para pular prompt
-- Testes: `cd reconner && pytest`
-- Instalar: `./scripts/install-reconner.sh`
-- Alterações no pipeline devem manter compatibilidade do `summary.json`
+- Package at `reconner/reconner/` — do not move without updating ReconRunner
+- Invoked from C++ via `python3 -m reconner --quiet`
+- Legal authorization: C++ UI confirms; CLI uses `--quiet` to skip prompt
+- Tests: `cd reconner && pytest`
+- Install: `./scripts/install-reconner.sh`
+- Pipeline changes must keep `summary.json` schema compatible
+- New docs/comments in **English only**

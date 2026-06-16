@@ -1,17 +1,18 @@
 ---
-description: UI Qt e tema hacker anos 90
+description: Qt UI and 90s hacker theme
 globs: "src/ui/**"
 alwaysApply: false
 ---
 
-# UI / Tema Hacker 90s
+# UI / 90s Hacker Theme
 
-- Paleta: fundo `#0a0a0a`, texto `#00ff41`, accent `#00ffff`, warning `#ffb000`
-- Fonte monospace: Courier New, DejaVu Sans Mono
-- Bordas retas (sem border-radius) — estética CRT
-- Labels com prefixo `>>` estilo terminal
-- Logs com timestamp `[HH:mm:ss]`
-- Textos de botão em UPPERCASE (BOOT ZAP, RUN RECON)
-- Tabs: `[ ZAP ]` e `[ RECON ]`
+- Palette: background `#0a0a0a`, text `#00ff41`, accent `#00ffff`, warning `#ffb000`
+- Monospace font: Courier New, DejaVu Sans Mono
+- Square borders (no border-radius) — CRT aesthetic
+- Labels with `>>` terminal prefix
+- Logs with timestamp `[HH:mm:ss]`
+- Button text in UPPERCASE (BOOT ZAP, RUN RECON)
+- Tabs: `[ ZAP ]` and `[ RECON ]`
+- **All UI strings in English**
 
-Não adicionar widgets sem conectar a um serviço existente.
+Do not add widgets without connecting to an existing service.

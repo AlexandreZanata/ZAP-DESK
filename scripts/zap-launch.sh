@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# OWASP ZAP launcher — configurável via variáveis de ambiente
+# OWASP ZAP launcher — configurable via environment variables
 set -euo pipefail
 
 ZAP_HOME="${ZAP_HOME:-/data/dev/tools/zap}"

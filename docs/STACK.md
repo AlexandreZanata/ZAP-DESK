@@ -1,40 +1,41 @@
-# Stack Técnica — ZAP-DESK
+# Technical Stack — ZAP-DESK
 
 ## Desktop (C++)
 
-| Componente | Versão | Uso |
-|------------|--------|-----|
-| C++ | 20 | Linguagem principal |
+| Component | Version | Purpose |
+|-----------|---------|---------|
+| C++ | 20 | Primary language |
 | Qt6 | 6.x | Widgets, Network, Process |
 | CMake | 3.16+ | Build system |
 
 ## Recon Engine (Python)
 
-| Componente | Versão | Uso |
-|------------|--------|-----|
-| Python | 3.10+ | Runtime reconner |
+| Component | Version | Purpose |
+|-----------|---------|---------|
+| Python | 3.10+ | Reconner runtime |
 | Click | 8+ | CLI |
 | Rich | 10+ | Progress UI (CLI) |
-| Jinja2 | 3+ | Relatórios |
+| Jinja2 | 3+ | Reports |
 
-## Ferramentas Externas (Reconner)
+## External Tools (Reconner)
 
-| Ferramenta | Função |
-|------------|--------|
-| subfinder | Subdomínios |
-| httpx | Hosts vivos |
-| nmap | Portas/serviços |
-| whatweb | Fingerprint |
-| gobuster | Diretórios |
-| nuclei | Vulnerabilidades |
+| Tool | Role |
+|------|------|
+| subfinder | Subdomains |
+| httpx | Live hosts |
+| nmap | Ports/services |
+| whatweb | Fingerprinting |
+| gobuster | Directories |
+| nuclei | Vulnerabilities |
 
 ## OWASP ZAP
 
-- REST API JSON em `http://127.0.0.1:8080`
-- Atualização via GitHub Releases (`zaproxy/zap`)
+- JSON REST API at `http://127.0.0.1:8080`
+- Updates via GitHub Releases (`zaproxy/zap`)
 - Launcher: `scripts/zap-launch.sh`
+- **Complete Linux guide:** [ZAP-INSTALL-LINUX.md](ZAP-INSTALL-LINUX.md)
 
-## Dependências de Sistema
+## System Dependencies
 
 ```bash
 # C++ / Qt
@@ -52,3 +53,9 @@ cd reconner && ./install-tools.sh
 ./scripts/build.sh
 ./build/zap-desk
 ```
+
+## Related docs
+
+- [Architecture](ARCHITECTURE.md)
+- [ZAP + Reconner integration](INTEGRATION.md)
+- [Development roadmap](ROADMAP.md)

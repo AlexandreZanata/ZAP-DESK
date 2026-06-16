@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget* parent)
         m_reconBtn->setEnabled(true);
         m_stopReconBtn->setEnabled(false);
         m_feedZapBtn->setEnabled(ok && !summary.isEmpty());
-        appendLog(ok ? ">> RECON COMPLETO — " + summary : ">> RECON FALHOU");
+        appendLog(ok ? ">> RECON COMPLETE — " + summary : ">> RECON FAILED");
     });
 
     connect(&m_updater, &ZapUpdater::logMessage, this, &MainWindow::appendLog);
@@ -42,8 +42,8 @@ MainWindow::MainWindow(QWidget* parent)
     connect(&m_pollTimer, &QTimer::timeout, this, &MainWindow::onPollStatus);
     m_pollTimer.start(2000);
 
-    appendLog("ZAP-DESK v0.2.0 — terminal de segurança ativo");
-    appendLog("Reconner integrado em: " + AppConfig::instance().reconnerDir());
+    appendLog("ZAP-DESK v0.2.0 — security terminal online");
+    appendLog("Reconner path: " + AppConfig::instance().reconnerDir());
     setConnectedUi(m_daemon.isRunning());
     if (m_daemon.isRunning()) onCheckConnection();
 }
@@ -77,7 +77,7 @@ void MainWindow::setupUi() {
     auto* targetBox = new QGroupBox(">> TARGET");
     auto* targetLayout = new QHBoxLayout(targetBox);
     m_urlInput = new QLineEdit("https://");
-    m_urlInput->setPlaceholderText("https://alvo.autorizado.com");
+    m_urlInput->setPlaceholderText("https://authorized-target.com");
     targetLayout->addWidget(m_urlInput);
     zapLayout->addWidget(targetBox);
 
@@ -111,10 +111,10 @@ void MainWindow::setupUi() {
     // --- RECON tab ---
     auto* reconLayout = new QVBoxLayout(reconTab);
 
-    m_authorized = new QCheckBox("Confirmo autorização escrita para testar o alvo");
-    m_fastMode = new QCheckBox("Modo rápido (--fast)");
-    m_skipNuclei = new QCheckBox("Pular nuclei (--skip-nuclei)");
-    m_useProxy = new QCheckBox("Rotear via proxy ZAP (127.0.0.1:8080)");
+    m_authorized = new QCheckBox("I confirm written authorization to test this target");
+    m_fastMode = new QCheckBox("Fast mode (--fast)");
+    m_skipNuclei = new QCheckBox("Skip nuclei (--skip-nuclei)");
+    m_useProxy = new QCheckBox("Route via ZAP proxy (127.0.0.1:8080)");
     m_useProxy->setChecked(true);
 
     reconLayout->addWidget(m_authorized);
@@ -138,7 +138,7 @@ void MainWindow::setupUi() {
 
     auto* reconInfo = new QLabel(
         "Pipeline: subfinder → httpx → nmap → whatweb → gobuster → nuclei\n"
-        "Resultados em: " + AppConfig::instance().resultsDir());
+        "Results dir: " + AppConfig::instance().resultsDir());
     reconInfo->setObjectName("hint");
     reconLayout->addWidget(reconInfo);
     reconLayout->addStretch();
@@ -224,7 +224,7 @@ void MainWindow::setConnectedUi(bool connected) {
 }
 
 void MainWindow::onStartZap() {
-    appendLog(">> Iniciando motor ZAP...");
+    appendLog(">> Starting ZAP engine...");
     m_daemon.start();
 }
 
@@ -243,25 +243,25 @@ void MainWindow::onCheckConnection() {
         m_statusLabel->setText(QString(">> STATUS: ONLINE — ZAP %1").arg(version));
         m_statusLabel->setStyleSheet("color: #00ff41;");
         setConnectedUi(true);
-        appendLog(QString(">> ZAP conectado: v%1").arg(version));
+        appendLog(QString(">> ZAP connected: v%1").arg(version));
     });
 }
 
 void MainWindow::onAjaxScan() {
     const QString url = currentTarget();
     if (url.isEmpty() || url == "https://") {
-        appendLog(">> ERRO: informe URL válida.");
+        appendLog(">> ERROR: enter a valid URL.");
         return;
     }
 
     appendLog(QString(">> AJAX SPIDER → %1").arg(url));
     m_client.accessUrl(url, [this, url](bool ok, const QString& err) {
         if (!ok) {
-            appendLog(">> FALHA accessUrl: " + err);
+            appendLog(">> FAIL accessUrl: " + err);
             return;
         }
         m_client.startAjaxSpider(url, [this](bool started, const QString& msg) {
-            appendLog(started ? ">> AJAX SPIDER running..." : ">> ERRO: " + msg);
+            appendLog(started ? ">> AJAX SPIDER running..." : ">> ERROR: " + msg);
         });
     });
 }
@@ -269,19 +269,19 @@ void MainWindow::onAjaxScan() {
 void MainWindow::onActiveScan() {
     const QString url = currentTarget();
     if (url.isEmpty() || url == "https://") {
-        appendLog(">> ERRO: informe URL válida.");
+        appendLog(">> ERROR: enter a valid URL.");
         return;
     }
 
     appendLog(QString(">> ACTIVE SCAN → %1").arg(url));
     m_client.startActiveScan(url, [this](bool ok, const QString& msg) {
-        appendLog(ok ? ">> ACTIVE SCAN iniciado." : ">> ERRO: " + msg);
+        appendLog(ok ? ">> ACTIVE SCAN started." : ">> ERROR: " + msg);
     });
 }
 
 void MainWindow::onStopScans() {
-    m_client.stopAjaxSpider([this](bool) { appendLog(">> AJAX SPIDER abortado."); });
-    m_client.stopActiveScan([this](bool) { appendLog(">> ACTIVE SCAN abortado."); });
+    m_client.stopAjaxSpider([this](bool) { appendLog(">> AJAX SPIDER aborted."); });
+    m_client.stopActiveScan([this](bool) { appendLog(">> ACTIVE SCAN aborted."); });
 }
 
 void MainWindow::onRefreshAlerts() {
@@ -299,7 +299,7 @@ void MainWindow::onRefreshAlerts() {
             m_alertsTable->setItem(i, 2, new QTableWidgetItem(a.url));
             m_alertsTable->setItem(i, 3, new QTableWidgetItem(a.description));
         }
-        appendLog(QString(">> %1 alerta(s) carregado(s).").arg(alerts.size()));
+        appendLog(QString(">> %1 alert(s) loaded.").arg(alerts.size()));
     });
 }
 
@@ -325,14 +325,14 @@ void MainWindow::onPollStatus() {
 
 void MainWindow::onStartRecon() {
     if (!m_authorized->isChecked()) {
-        QMessageBox::warning(this, "Autorização necessária",
-                             "Confirme que possui autorização escrita antes de executar recon.");
+        QMessageBox::warning(this, "Authorization required",
+                             "Confirm written authorization before running recon.");
         return;
     }
 
     const QString target = currentTarget();
     if (target.isEmpty() || target == "https://") {
-        appendLog(">> ERRO: informe alvo para recon.");
+        appendLog(">> ERROR: enter a target for recon.");
         return;
     }
 
@@ -352,54 +352,54 @@ void MainWindow::onStopRecon() {
 void MainWindow::onFeedZapFromRecon() {
     const QString summary = m_recon.lastSummaryPath();
     if (summary.isEmpty()) {
-        appendLog(">> ERRO: summary.json não encontrado.");
+        appendLog(">> ERROR: summary.json not found.");
         return;
     }
 
     if (!m_daemon.isRunning()) {
-        appendLog(">> ERRO: ZAP offline. Inicie o ZAP primeiro.");
+        appendLog(">> ERROR: ZAP offline. Start ZAP first.");
         return;
     }
 
-    appendLog(">> Alimentando ZAP com URLs do recon...");
+    appendLog(">> Feeding ZAP with recon URLs...");
     m_bridge.feedZap(summary, [this](int seeded, const QString& error) {
-        appendLog(QString(">> %1 URL(s) enviadas ao ZAP.").arg(seeded));
-        if (!error.isEmpty()) appendLog(">> Aviso: " + error);
+        appendLog(QString(">> %1 URL(s) sent to ZAP.").arg(seeded));
+        if (!error.isEmpty()) appendLog(">> Warning: " + error);
         onActiveScan();
     });
 }
 
 void MainWindow::onCheckZapUpdate() {
-    appendLog(">> Verificando atualizações do OWASP ZAP...");
+    appendLog(">> Checking OWASP ZAP updates...");
     m_client.checkConnection([this](bool ok, const QString& version) {
         if (!ok) {
-            appendLog(">> ZAP offline — não foi possível verificar versão local.");
+            appendLog(">> ZAP offline — cannot check local version.");
             return;
         }
 
         m_updater.checkForUpdates(version, [this](const ZapUpdateInfo& info) {
             if (info.latestVersion.isEmpty()) {
-                appendLog(">> Não foi possível consultar releases do GitHub.");
+                appendLog(">> Could not fetch GitHub releases.");
                 return;
             }
 
             if (info.updateAvailable) {
-                appendLog(QString(">> UPDATE DISPONÍVEL: v%1 → v%2")
+                appendLog(QString(">> UPDATE AVAILABLE: v%1 → v%2")
                               .arg(info.localVersion, info.latestVersion));
                 appendLog(">> Release: " + info.releaseUrl);
 
                 const auto answer = QMessageBox::question(
-                    this, "Atualização ZAP",
-                    QString("Nova versão %1 disponível (local: %2).\nExecutar scripts/update-zap.sh?")
+                    this, "ZAP Update",
+                    QString("New version %1 available (local: %2).\nRun scripts/update-zap.sh?")
                         .arg(info.latestVersion, info.localVersion));
 
                 if (answer == QMessageBox::Yes) {
                     m_updater.launchUpdateScript([this](bool success, const QString& err) {
-                        appendLog(success ? ">> ZAP atualizado com sucesso." : ">> " + err);
+                        appendLog(success ? ">> ZAP updated successfully." : ">> " + err);
                     });
                 }
             } else {
-                appendLog(QString(">> ZAP atualizado (v%1).").arg(info.localVersion));
+                appendLog(QString(">> ZAP is up to date (v%1).").arg(info.localVersion));
             }
         });
     });
@@ -407,8 +407,8 @@ void MainWindow::onCheckZapUpdate() {
 
 void MainWindow::onFullPipeline() {
     if (!m_authorized->isChecked()) {
-        QMessageBox::warning(this, "Autorização necessária",
-                             "Confirme autorização escrita antes do pipeline completo.");
+        QMessageBox::warning(this, "Authorization required",
+                             "Confirm written authorization before running the full pipeline.");
         return;
     }
 

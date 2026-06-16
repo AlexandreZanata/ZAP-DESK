@@ -47,7 +47,7 @@ void ReconBridge::feedZap(const QString& summaryPath,
                           std::function<void(int seeded, QString error)> callback) {
     const QStringList urls = loadUrlsFromSummary(summaryPath);
     if (urls.isEmpty()) {
-        callback(0, "Nenhuma URL encontrada em summary.json");
+        callback(0, "No URLs found in summary.json");
         return;
     }
 

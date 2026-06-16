@@ -13,19 +13,19 @@ ZapDaemon::ZapDaemon(QObject* parent) : QObject(parent) {
 
     connect(&m_process, &QProcess::started, this, [this]() {
         writePid(m_process.processId());
-        emit logMessage("ZAP iniciado em modo daemon (porta 8080)");
+        emit logMessage("ZAP started in daemon mode (port 8080)");
         emit stateChanged(true);
     });
 
     connect(&m_process, &QProcess::finished, this, [this](int code, QProcess::ExitStatus) {
         clearPid();
-        emit logMessage(QString("ZAP encerrado (código %1)").arg(code));
+        emit logMessage(QString("ZAP stopped (exit code %1)").arg(code));
         emit stateChanged(false);
     });
 
     connect(&m_process, &QProcess::errorOccurred, this, [this](QProcess::ProcessError error) {
         if (error == QProcess::FailedToStart) {
-            emit logMessage("Erro: não foi possível iniciar o ZAP. Verifique a instalação.");
+            emit logMessage("Error: could not start ZAP. Check installation.");
             emit stateChanged(false);
         }
     });
@@ -39,7 +39,7 @@ bool ZapDaemon::isRunning() const {
 
 void ZapDaemon::start() {
     if (isRunning()) {
-        emit logMessage("ZAP já está em execução.");
+        emit logMessage("ZAP is already running.");
         emit stateChanged(true);
         return;
     }
@@ -55,7 +55,7 @@ void ZapDaemon::stop() {
     if (pid > 0) {
         kill(pid, SIGTERM);
         clearPid();
-        emit logMessage("ZAP parado.");
+        emit logMessage("ZAP stopped.");
         emit stateChanged(false);
         return;
     }

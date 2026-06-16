@@ -1,29 +1,29 @@
-# Integração Reconner + OWASP ZAP
+# Reconner + OWASP ZAP Integration
 
-## Visão Geral
+## Overview
 
-ZAP-DESK unifica dois motores complementares:
+ZAP-DESK unifies two complementary engines:
 
-| Motor | Papel | Profundidade |
-|-------|-------|--------------|
-| **Reconner** | Mapeamento de superfície | Amplo e rápido |
-| **OWASP ZAP** | Teste de aplicação | Profundo (spider, active scan) |
+| Engine | Role | Depth |
+|--------|------|-------|
+| **Reconner** | Surface mapping | Broad and fast |
+| **OWASP ZAP** | Application testing | Deep (spider, active scan) |
 
-## Localização do Reconner
+## Reconner Location
 
-O Reconner v2.0.0 está vendored em `reconner/` (origem: THE-ULTMATE-RECONNER).
+Reconner v2.0.0 is vendored in `reconner/` (origin: THE-ULTMATE-RECONNER).
 
 ```
 reconner/
-├── reconner/cli.py      # Entry point CLI
-├── reconner/runner.py   # ToolRunner — orquestração
+├── reconner/cli.py      # CLI entry point
+├── reconner/runner.py   # ToolRunner — orchestration
 ├── reconner/reporter.py # summary.json
 └── setup.py
 ```
 
-## Como o ZAP-DESK invoca o Reconner
+## How ZAP-DESK Invokes Reconner
 
-`ReconRunner` (C++) executa:
+`ReconRunner` (C++) runs:
 
 ```bash
 cd $RECONNER_DIR
@@ -35,42 +35,44 @@ PYTHONPATH=$RECONNER_DIR python3 -m reconner \
   --proxy http://127.0.0.1:8080
 ```
 
-O flag `--quiet` pula o prompt interativo (a UI já exige checkbox de autorização).
+The `--quiet` flag skips the interactive prompt (the UI already requires an authorization checkbox).
 
 ## Bridge summary.json → ZAP
 
-`ReconBridge` lê `summary.json` e extrai URLs de:
+`ReconBridge` reads `summary.json` and extracts URLs from:
 
 - `live_hosts.list`
 - `subdomains.list`
 - `gobuster_results[].url`
 
-Para cada URL, chama `ZapClient::accessUrl()` para popular o site tree do ZAP.
+For each URL, it calls `ZapClient::accessUrl()` to populate the ZAP site tree.
 
-## Modos de Operação
+## Operation Modes
 
-### 1. Recon isolado
-Aba [RECON] → RUN RECON → resultados em `~/.local/share/ZAP-DESK/results/`
+### 1. Isolated recon
+**[RECON]** tab → RUN RECON → results in `~/.local/share/ZAP-DESK/results/`
 
-### 2. Feed manual
-Após recon → FEED ZAP → ACTIVE SCAN
+### 2. Manual feed
+After recon → FEED ZAP → ACTIVE SCAN
 
 ### 3. Full Pipeline
-BOOT ZAP → RECON (via proxy) → FEED → ACTIVE SCAN automático
+BOOT ZAP → RECON (via proxy) → FEED → automatic ACTIVE SCAN
 
 ## Proxy Mode
 
-Com `--proxy http://127.0.0.1:8080`, o tráfego HTTP do httpx, gobuster e nuclei passa pelo ZAP, permitindo inspeção manual paralela.
+With `--proxy http://127.0.0.1:8080`, HTTP traffic from httpx, gobuster, and nuclei passes through ZAP, enabling parallel manual inspection.
 
-## Atualizações ZAP
+## ZAP Updates
 
-1. Botão **CHECK ZAP UPDATE** na aba ZAP
-2. Consulta GitHub API `zaproxy/zap/releases/latest`
-3. Script `scripts/update-zap.sh` baixa e instala em `$ZAP_HOME`
+1. **CHECK ZAP UPDATE** button on the ZAP tab
+2. Queries GitHub API `zaproxy/zap/releases/latest`
+3. Script `scripts/update-zap.sh` downloads and installs into `$ZAP_HOME`
 
-Recomendado: verificar atualizações semanalmente (OWASP ZAP release cycle).
+Complete installation and configuration guide: **[ZAP-INSTALL-LINUX.md](ZAP-INSTALL-LINUX.md)**
 
-## Schema summary.json
+Recommended: check for updates weekly (OWASP ZAP release cycle).
+
+## summary.json Schema
 
 ```json
 {
@@ -83,10 +85,12 @@ Recomendado: verificar atualizações semanalmente (OWASP ZAP release cycle).
 }
 ```
 
-## Roadmap de Integração
+## Integration Roadmap
 
-- [ ] Fase ZAP nativa no ToolRunner Python
-- [ ] Merge de alertas ZAP + nuclei na UI
-- [ ] Export PDF unificado
-- [ ] Agendamento de scans
-- [ ] API local D-Bus para automação
+Planned work is tracked in **[ROADMAP.md](ROADMAP.md)** (Phase 2 and beyond). Highlights:
+
+- [ ] Native ZAP phase in Python ToolRunner
+- [ ] Merge ZAP + nuclei alerts in the UI
+- [ ] Unified PDF export
+- [ ] Scan scheduling
+- [ ] Local D-Bus API for automation

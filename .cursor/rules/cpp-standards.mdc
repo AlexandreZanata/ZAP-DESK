@@ -1,21 +1,22 @@
 ---
-description: Padrões C++20 para o ZAP-DESK
+description: C++20 standards for ZAP-DESK
 globs: "**/*.{cpp,hpp,h}"
 alwaysApply: false
 ---
 
 # C++ Standards
 
-- C++20, sem extensões proprietárias
-- Headers em `#pragma once`
-- Qt: herdar `QObject`, usar signals/slots para async
-- Callbacks HTTP via `std::function` no ZapClient
-- Sem `using namespace std` em headers
-- Preferir `const` e referências const
-- Erros de domínio: retornar via callback, não throw em hot path
+- C++20, no proprietary extensions
+- Headers use `#pragma once`
+- Qt: inherit `QObject`, use signals/slots for async
+- HTTP callbacks via `std::function` in ZapClient
+- No `using namespace std` in headers
+- Prefer `const` and const references
+- Domain errors: return via callback, no throw in hot paths
+- **User-facing strings in English**
 
 ```cpp
-// ✅ Paths centralizados
+// ✅ Centralized paths
 const auto& cfg = AppConfig::instance();
 m_client.setBaseUrl(cfg.zapApiUrl());
 

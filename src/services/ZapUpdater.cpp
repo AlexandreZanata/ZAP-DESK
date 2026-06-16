@@ -69,7 +69,7 @@ void ZapUpdater::launchUpdateScript(std::function<void(bool, QString)> callback)
     connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
             this, [process, callback](int code, QProcess::ExitStatus status) {
                 const bool ok = status == QProcess::NormalExit && code == 0;
-                callback(ok, ok ? QString() : QString("Atualização falhou (código %1)").arg(code));
+                callback(ok, ok ? QString() : QString("Update failed (exit code %1)").arg(code));
                 process->deleteLater();
             });
 

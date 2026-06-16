@@ -1,0 +1,30 @@
+---
+description: All project content must be written in English
+alwaysApply: true
+---
+
+# English Only
+
+All project artifacts must be written in **English**:
+
+- Documentation (`docs/`, `README.md`, guides)
+- Cursor rules (`.cursor/rules/`)
+- UI strings (labels, buttons, dialogs, log messages)
+- Code comments and commit messages
+- Shell script output and comments
+- Error messages shown to the user
+
+## Do not
+
+- Add Portuguese, Spanish, or mixed-language docs
+- Use Portuguese in `QMessageBox`, `QLabel`, or `appendLog()` strings
+- Create `*-PT-BR.md` or locale-specific guides in the repo
+
+## Exceptions
+
+- External tool output (subfinder, nuclei, etc.) is shown as-is
+- User-provided target URLs and scan data are not translated
+
+## When editing
+
+If you find non-English project text, translate it to English in the same change.
